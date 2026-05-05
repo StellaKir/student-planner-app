@@ -1,0 +1,140 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f6f7fb;
+  color: #1f2340;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+}
+
+.sidebar {
+  width: 240px;
+  background: #ffffff;
+  padding: 28px;
+  border-right: 1px solid #e6e8f0;
+}
+
+.sidebar h2 {
+  margin-top: 0;
+  color: #6c63ff;
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 40px;
+}
+
+.sidebar a {
+  color: #62677b;
+  font-weight: 600;
+}
+
+.main {
+  flex: 1;
+  padding: 36px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 34px;
+}
+
+.header p {
+  margin-top: 8px;
+  color: #727790;
+}
+
+button {
+  border: none;
+  background: #6c63ff;
+  color: white;
+  padding: 14px 18px;
+  border-radius: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.schedule {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 18px;
+}
+
+.day {
+  background: white;
+  min-height: 420px;
+  border-radius: 22px;
+  padding: 18px;
+  box-shadow: 0 10px 30px rgba(31, 35, 64, 0.08);
+}
+
+.day h3 {
+  margin-top: 0;
+}
+
+.course {
+  background: #e8f3ff;
+  border-left: 5px solid #5aa9ff;
+  padding: 14px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 16px;
+}
+
+.course.purple {
+  background: #eeeaff;
+  border-left-color: #8b7cff;
+}
+
+.course span,
+.course small {
+  color: #62677b;
+}
+
+.form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.form input,
+.form select {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+
+.course {
+  position: relative;
+}
+
+.delete-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: transparent;
+  color: #62677b;
+  padding: 0;
+  font-size: 20px;
+  border: none;
+  cursor: pointer;
+}
