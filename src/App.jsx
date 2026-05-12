@@ -1,5 +1,6 @@
 import "./App.css";
 import { useState, useEffect } from "react";
+import { CalendarDays, BookOpen, StickyNote, Moon, Sun } from "lucide-react";
 import { courses } from "./data/courses";
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
@@ -15,6 +16,7 @@ function App() {
   const [courseToDelete, setCourseToDelete] = useState(null);
   const [showClearModal, setShowClearModal] = useState(false);
   const [showFormModal, setShowFormModal] = useState(false);
+  const [activeTab, setActiveTab] = useState("schedule");
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -25,6 +27,12 @@ function App() {
   });
 
   const [expandedCourse, setExpandedCourse] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    return localStorage.getItem("loggedIn") === "true";
+  });
+  const [username, setUsername] = useState(
+    localStorage.getItem("username") || "",
+  );
 
   useEffect(() => {
     localStorage.setItem("courses", JSON.stringify(courseList));
@@ -217,34 +225,116 @@ function App() {
       ? 0
       : Math.round((completedCourses / totalCourses) * 100);
 
+  function login() {
+    const username = document.getElementById("login-username").value;
+    const password = document.getElementById("login-password").value;
+
+    if (!username || !password) {
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    localStorage.setItem("loggedIn", "true");
+    localStorage.setItem("username", username);
+    setIsLoggedIn(true);
+    setUsername(username);
+  }
+
+  function logout() {
+    localStorage.removeItem("loggedIn");
+    setIsLoggedIn(false);
+    localStorage.removeItem("username");
+    setUsername("");
+  }
+
+  if (!isLoggedIn) {
+    return (
+      <div className="login-page">
+        <div className="login-card">
+          <h1>StudyPlan</h1>
+
+          <p>Sign in to manage your university schedule</p>
+
+          <input type="text" placeholder="Username" id="login-username" />
+
+          <input type="password" placeholder="Password" id="login-password" />
+
+          <button onClick={login}>Login</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={darkMode ? "app dark" : "app"}>
+      <button
+        className="theme-toggle floating-theme"
+        onClick={() => setDarkMode(!darkMode)}
+        title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+      >
+        {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+      </button>
       <aside className="sidebar">
         <h2>StudyPlan</h2>
 
         <nav>
-          <a>Schedule</a>
-          <a>Courses</a>
-          <a>Notes</a>
+          <button
+            className={
+              activeTab === "schedule" ? "nav-link active" : "nav-link"
+            }
+            onClick={() => setActiveTab("schedule")}
+          >
+            <>
+              <CalendarDays size={18} />
+              Schedule
+            </>
+          </button>
+
+          <button
+            className={activeTab === "courses" ? "nav-link active" : "nav-link"}
+            onClick={() => setActiveTab("courses")}
+          >
+            <>
+              <BookOpen size={18} />
+              Courses
+            </>
+          </button>
+
+          <button
+            className={activeTab === "notes" ? "nav-link active" : "nav-link"}
+            onClick={() => setActiveTab("notes")}
+          >
+            <>
+              <StickyNote size={18} />
+              Notes
+            </>
+          </button>
         </nav>
       </aside>
 
       <main className="main">
         <header className="header">
-          <div>
-            <h1>My Schedule</h1>
-            <p>Organize your weekly university classes</p>
+          <div className="header-left">
+            <div>
+              <h1>My Schedule</h1>
+              <p>Organize your weekly university classes</p>
+            </div>
+
+            <div className="profile-box">
+              <div className="avatar">{username.charAt(0).toUpperCase()}</div>
+
+              <div>
+                <strong>{username}</strong>
+                <p>Student</p>
+                <button className="profile-logout-btn" onClick={logout}>
+                  Logout
+                </button>
+              </div>
+            </div>
           </div>
 
           <div className="header-actions">
             <button onClick={openAddModal}>Add Course</button>
-
-            <button
-              className="theme-btn"
-              onClick={() => setDarkMode(!darkMode)}
-            >
-              {darkMode ? "Light Mode" : "Dark Mode"}
-            </button>
 
             <button
               className="clear-btn"
@@ -304,80 +394,139 @@ function App() {
           </select>
         </div>
 
-        <section className="schedule">
-          {days.map((day) => {
-            const dayCourses = filteredCourses
-              .filter((course) => course.day === day)
-              .sort((a, b) => toMinutes(a.startTime) - toMinutes(b.startTime));
+        {activeTab === "schedule" && (
+          <section className="schedule">
+            {days.map((day) => {
+              const dayCourses = filteredCourses
+                .filter((course) => course.day === day)
+                .sort(
+                  (a, b) => toMinutes(a.startTime) - toMinutes(b.startTime),
+                );
 
-            return (
-              <div className="day" key={day}>
-                <h3>{day}</h3>
+              return (
+                <div className="day" key={day}>
+                  <h3>{day}</h3>
 
-                {dayCourses.length === 0 && (
-                  <p className="empty-day">No classes scheduled</p>
-                )}
+                  {dayCourses.length === 0 && (
+                    <p className="empty-day">No classes scheduled</p>
+                  )}
 
-                {dayCourses.map((course) => (
-                  <div
-                    className={`course ${course.color} ${
-                      course.completed ? "completed-course" : ""
-                    }`}
-                    key={course.id}
-                    onClick={() => toggleExpand(course.id)}
-                  >
-                    <button
-                      className="delete-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteCourse(course.id);
-                      }}
+                  {dayCourses.map((course) => (
+                    <div
+                      className={`course ${course.color} ${
+                        course.completed ? "completed-course" : ""
+                      }`}
+                      key={course.id}
+                      onClick={() => toggleExpand(course.id)}
                     >
-                      ×
-                    </button>
+                      <button
+                        className="delete-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteCourse(course.id);
+                        }}
+                      >
+                        ×
+                      </button>
 
-                    <button
-                      className="edit-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        editCourse(course);
-                      }}
+                      <button
+                        className="edit-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          editCourse(course);
+                        }}
+                      >
+                        Edit
+                      </button>
+
+                      <strong>{course.title}</strong>
+
+                      <span>
+                        {formatTime(course.startTime)} -{" "}
+                        {formatTime(course.endTime)}
+                      </span>
+
+                      {expandedCourse === course.id && (
+                        <>
+                          <small>{course.room}</small>
+
+                          <button
+                            className="complete-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleComplete(course.id);
+                            }}
+                          >
+                            {course.completed ? "Completed" : "Mark Complete"}
+                          </button>
+
+                          {course.notes && (
+                            <p className="course-notes">{course.notes}</p>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+          </section>
+        )}
+        {activeTab === "courses" && (
+          <section className="tab-section">
+            <h2>All Courses</h2>
+
+            <div className="course-list">
+              {courseList.length === 0 ? (
+                <p className="empty-day">No courses added yet.</p>
+              ) : (
+                courseList.map((course) => (
+                  <div className={`list-card ${course.color}`} key={course.id}>
+                    <div>
+                      <strong>{course.title}</strong>
+                      <p>
+                        {course.day} · {formatTime(course.startTime)} -{" "}
+                        {formatTime(course.endTime)}
+                      </p>
+                      <small>{course.room}</small>
+                    </div>
+
+                    <span
+                      className={course.completed ? "status done" : "status"}
                     >
-                      Edit
-                    </button>
-
-                    <strong>{course.title}</strong>
-
-                    <span>
-                      {formatTime(course.startTime)} -{" "}
-                      {formatTime(course.endTime)}
+                      {course.completed ? "Completed" : "Pending"}
                     </span>
-
-                    {expandedCourse === course.id && (
-                      <>
-                        <small>{course.room}</small>
-
-                        <button
-                          className="complete-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleComplete(course.id);
-                          }}
-                        >
-                          {course.completed ? "Completed" : "Mark Complete"}
-                        </button>
-
-                        {course.notes && (
-                          <p className="course-notes">{course.notes}</p>
-                        )}
-                      </>
-                    )}
                   </div>
-                ))}
-              </div>
-            );
-          })}
-        </section>
+                ))
+              )}
+            </div>
+          </section>
+        )}
+        {activeTab === "notes" && (
+          <section className="tab-section">
+            <h2>Course Notes</h2>
+
+            <div className="course-list">
+              {courseList.filter((course) => course.notes).length === 0 ? (
+                <p className="empty-day">No notes added yet.</p>
+              ) : (
+                courseList
+                  .filter((course) => course.notes)
+                  .map((course) => (
+                    <div
+                      className={`list-card ${course.color}`}
+                      key={course.id}
+                    >
+                      <div>
+                        <strong>{course.title}</strong>
+                        <p>{course.notes}</p>
+                      </div>
+                    </div>
+                  ))
+              )}
+            </div>
+          </section>
+        )}
       </main>
 
       {showFormModal && (
