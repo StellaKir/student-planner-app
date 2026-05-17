@@ -1,5 +1,7 @@
+import "react-calendar/dist/Calendar.css";
 import "./App.css";
 import { useState, useEffect } from "react";
+import Calendar from "react-calendar";
 import {
   CalendarDays,
   BookOpen,
@@ -29,6 +31,7 @@ function App() {
   const [showClearModal, setShowClearModal] = useState(false);
   const [showFormModal, setShowFormModal] = useState(false);
   const [activeTab, setActiveTab] = useState("schedule");
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -475,6 +478,16 @@ function App() {
           >
             <GraduationCap size={18} />
             <span>Exams</span>
+          </button>
+
+          <button
+            className={
+              activeTab === "calendar" ? "nav-link active" : "nav-link"
+            }
+            onClick={() => setActiveTab("calendar")}
+          >
+            <CalendarDays size={18} />
+            <span>Calendar</span>
           </button>
         </nav>
       </aside>
@@ -962,6 +975,76 @@ function App() {
                   </div>
                 ))
               )}
+            </div>
+          </section>
+        )}
+
+        {activeTab === "calendar" && (
+          <section className="tab-section">
+            <div className="calendar-wrapper">
+              <Calendar
+                className="study-calendar"
+                onChange={setSelectedDate}
+                value={selectedDate}
+                locale="en-US"
+                calendarType="gregory"
+                showNeighboringMonth={false}
+                prev2Label={null}
+                next2Label={null}
+                tileClassName={({ date, view }) => {
+                  if (view !== "month") return null;
+
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+
+                  const tileDate = new Date(date);
+                  tileDate.setHours(0, 0, 0, 0);
+
+                  if (tileDate < today) return "past-day";
+                  if (tileDate.getTime() === today.getTime())
+                    return "today-highlight";
+
+                  return null;
+                }}
+                tileContent={({ date, view }) => {
+                  if (view !== "month") return null;
+
+                  const formattedDate = date.toISOString().split("T")[0];
+
+                  const hasAssignment = assignments.some(
+                    (assignment) => assignment.dueDate === formattedDate,
+                  );
+
+                  const hasExam = exams.some(
+                    (exam) => exam.date === formattedDate,
+                  );
+
+                  return (
+                    <div className="calendar-dots">
+                      {hasAssignment && (
+                        <span className="dot assignment-dot"></span>
+                      )}
+                      {hasExam && <span className="dot exam-dot"></span>}
+                    </div>
+                  );
+                }}
+              />
+
+              <div className="calendar-legend">
+                <div className="legend-item">
+                  <span className="dot assignment-dot"></span>
+                  Assignment
+                </div>
+
+                <div className="legend-item">
+                  <span className="dot exam-dot"></span>
+                  Exam
+                </div>
+              </div>
+
+              <p className="selected-date">
+                Selected date: <strong>{selectedDate.toDateString()}</strong>
+              </p>
             </div>
           </section>
         )}
