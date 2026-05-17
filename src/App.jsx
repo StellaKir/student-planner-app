@@ -7,6 +7,8 @@ import {
   Moon,
   Sun,
   Star,
+  ClipboardList,
+  GraduationCap,
 } from "lucide-react";
 import { courses } from "./data/courses";
 
@@ -38,6 +40,15 @@ function App() {
   });
 
   const [expandedCourse, setExpandedCourse] = useState(null);
+
+  const [assignments, setAssignments] = useState(() => {
+    const saved = localStorage.getItem("assignments");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [exams, setExams] = useState(() => {
+    const saved = localStorage.getItem("exams");
+    return saved ? JSON.parse(saved) : [];
+  });
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     return localStorage.getItem("loggedIn") === "true";
   });
@@ -48,6 +59,14 @@ function App() {
   useEffect(() => {
     localStorage.setItem("courses", JSON.stringify(courseList));
   }, [courseList]);
+
+  useEffect(() => {
+    localStorage.setItem("assignments", JSON.stringify(assignments));
+  }, [assignments]);
+
+  useEffect(() => {
+    localStorage.setItem("exams", JSON.stringify(exams));
+  }, [exams]);
 
   useEffect(() => {
     localStorage.setItem("darkMode", darkMode);
@@ -225,19 +244,6 @@ function App() {
     setEditingId(null);
   }
 
-  function exportSchedule() {
-    const data = JSON.stringify(courseList, null, 2);
-    const file = new Blob([data], { type: "application/json" });
-    const url = URL.createObjectURL(file);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "student-schedule.json";
-    link.click();
-
-    URL.revokeObjectURL(url);
-  }
-
   const filteredCourses = courseList.filter((course) => {
     const matchesSearch = course.title
       .toLowerCase()
@@ -258,6 +264,11 @@ function App() {
     (course) => course.completed,
   ).length;
   const pendingCourses = totalCourses - completedCourses;
+  const totalAssignments = assignments.length;
+  const completedAssignments = assignments.filter(
+    (assignment) => assignment.completed,
+  ).length;
+  const pendingAssignments = totalAssignments - completedAssignments;
   const totalStudyMinutes = courseList.reduce((total, course) => {
     return total + (toMinutes(course.endTime) - toMinutes(course.startTime));
   }, 0);
@@ -314,6 +325,75 @@ function App() {
     setUsername("");
   }
 
+  function toggleAssignment(id) {
+    const updatedAssignments = assignments.map((assignment) =>
+      assignment.id === id
+        ? { ...assignment, completed: !assignment.completed }
+        : assignment,
+    );
+
+    setAssignments(updatedAssignments);
+  }
+
+  function deleteAssignment(id) {
+    const updatedAssignments = assignments.filter(
+      (assignment) => assignment.id !== id,
+    );
+
+    setAssignments(updatedAssignments);
+  }
+
+  function addExam() {
+    const title = document.getElementById("exam-title").value.trim();
+    const date = document.getElementById("exam-date").value;
+    const course = document.getElementById("exam-course").value;
+    const priority = document.getElementById("exam-priority").value;
+
+    if (!title || !date || !course) {
+      alert("Please fill in all exam fields.");
+      return;
+    }
+
+    const newExam = {
+      id: Date.now(),
+      title,
+      date,
+      course,
+      priority,
+    };
+
+    setExams([...exams, newExam]);
+
+    document.getElementById("exam-title").value = "";
+    document.getElementById("exam-date").value = "";
+    document.getElementById("exam-course").value = "";
+    document.getElementById("exam-priority").value = "medium";
+  }
+
+  function addAssignment() {
+    const title = document.getElementById("assignment-title").value.trim();
+    const dueDate = document.getElementById("assignment-date").value;
+    const course = document.getElementById("assignment-course").value;
+
+    if (!title || !dueDate || !course) {
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    const newAssignment = {
+      id: Date.now(),
+      title,
+      dueDate,
+      course,
+      completed: false,
+    };
+
+    setAssignments([...assignments, newAssignment]);
+
+    document.getElementById("assignment-title").value = "";
+    document.getElementById("assignment-date").value = "";
+  }
+
   if (!isLoggedIn) {
     return (
       <div className="login-page">
@@ -351,30 +431,24 @@ function App() {
             }
             onClick={() => setActiveTab("schedule")}
           >
-            <>
-              <CalendarDays size={18} />
-              Schedule
-            </>
+            <CalendarDays size={18} />
+            <span>Schedule</span>
           </button>
 
           <button
             className={activeTab === "courses" ? "nav-link active" : "nav-link"}
             onClick={() => setActiveTab("courses")}
           >
-            <>
-              <BookOpen size={18} />
-              Courses
-            </>
+            <BookOpen size={18} />
+            <span>Courses</span>
           </button>
 
           <button
             className={activeTab === "notes" ? "nav-link active" : "nav-link"}
             onClick={() => setActiveTab("notes")}
           >
-            <>
-              <StickyNote size={18} />
-              Notes
-            </>
+            <StickyNote size={18} />
+            <span>Notes</span>
           </button>
 
           <button
@@ -385,6 +459,22 @@ function App() {
           >
             <Star size={18} />
             Favorites
+          </button>
+          <button
+            className={
+              activeTab === "assignments" ? "nav-link active" : "nav-link"
+            }
+            onClick={() => setActiveTab("assignments")}
+          >
+            <ClipboardList size={18} />
+            <span>Assignments</span>
+          </button>
+          <button
+            className={activeTab === "exams" ? "nav-link active" : "nav-link"}
+            onClick={() => setActiveTab("exams")}
+          >
+            <GraduationCap size={18} />
+            <span>Exams</span>
           </button>
         </nav>
       </aside>
@@ -412,10 +502,6 @@ function App() {
 
           <div className="header-actions">
             <button onClick={openAddModal}>Add Course</button>
-
-            <button className="export-btn" onClick={exportSchedule}>
-              Export
-            </button>
 
             <button
               className="clear-btn"
@@ -486,6 +572,11 @@ function App() {
             <span>Weekly Hours</span>
             <strong>{totalStudyHours}h</strong>
           </div>
+
+          <div className="stat-card">
+            <span>Assignments</span>
+            <strong>{pendingAssignments}</strong>
+          </div>
         </div>
 
         <div className="progress-section">
@@ -555,104 +646,108 @@ function App() {
         </div>
 
         {activeTab === "schedule" && (
-          <section className="schedule">
-            {days.map((day) => {
-              const dayCourses = filteredCourses
-                .filter((course) => course.day === day)
-                .sort(
-                  (a, b) => toMinutes(a.startTime) - toMinutes(b.startTime),
+          <section className="tab-section">
+            <div className="schedule">
+              {days.map((day) => {
+                const dayCourses = filteredCourses
+                  .filter((course) => course.day === day)
+                  .sort(
+                    (a, b) => toMinutes(a.startTime) - toMinutes(b.startTime),
+                  );
+
+                return (
+                  <div className="day" key={day}>
+                    <h3>
+                      {day}
+                      <span className="day-count">
+                        {dayCourses.length}{" "}
+                        {dayCourses.length === 1 ? "class" : "classes"}
+                      </span>
+                    </h3>
+
+                    {dayCourses.length === 0 && (
+                      <p className="empty-day">No classes scheduled</p>
+                    )}
+
+                    {dayCourses.map((course) => (
+                      <div
+                        className={`course ${course.color} ${
+                          course.completed ? "completed-course" : ""
+                        }`}
+                        key={course.id}
+                        onClick={() => toggleExpand(course.id)}
+                      >
+                        <button
+                          className={
+                            course.favorite
+                              ? "favorite-btn active"
+                              : "favorite-btn"
+                          }
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFavorite(course.id);
+                          }}
+                        >
+                          ★
+                        </button>
+                        <button
+                          className="delete-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteCourse(course.id);
+                          }}
+                        >
+                          ×
+                        </button>
+
+                        <button
+                          className="edit-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            editCourse(course);
+                          }}
+                        >
+                          Edit
+                        </button>
+
+                        <strong>{course.title}</strong>
+
+                        <span
+                          className={`priority ${course.priority || "low"}`}
+                        >
+                          {course.priority || "low"}
+                        </span>
+
+                        <span>
+                          {formatTime(course.startTime)} -{" "}
+                          {formatTime(course.endTime)}
+                        </span>
+
+                        {expandedCourse === course.id && (
+                          <>
+                            <small>{course.room}</small>
+
+                            <button
+                              className="complete-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleComplete(course.id);
+                              }}
+                            >
+                              {course.completed ? "Completed" : "Mark Complete"}
+                            </button>
+
+                            {course.notes && (
+                              <p className="course-notes">{course.notes}</p>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 );
-
-              return (
-                <div className="day" key={day}>
-                  <h3>
-                    {day}
-                    <span className="day-count">
-                      {dayCourses.length}{" "}
-                      {dayCourses.length === 1 ? "class" : "classes"}
-                    </span>
-                  </h3>
-
-                  {dayCourses.length === 0 && (
-                    <p className="empty-day">No classes scheduled</p>
-                  )}
-
-                  {dayCourses.map((course) => (
-                    <div
-                      className={`course ${course.color} ${
-                        course.completed ? "completed-course" : ""
-                      }`}
-                      key={course.id}
-                      onClick={() => toggleExpand(course.id)}
-                    >
-                      <button
-                        className={
-                          course.favorite
-                            ? "favorite-btn active"
-                            : "favorite-btn"
-                        }
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleFavorite(course.id);
-                        }}
-                      >
-                        ★
-                      </button>
-                      <button
-                        className="delete-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteCourse(course.id);
-                        }}
-                      >
-                        ×
-                      </button>
-
-                      <button
-                        className="edit-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          editCourse(course);
-                        }}
-                      >
-                        Edit
-                      </button>
-
-                      <strong>{course.title}</strong>
-
-                      <span className={`priority ${course.priority || "low"}`}>
-                        {course.priority || "low"}
-                      </span>
-
-                      <span>
-                        {formatTime(course.startTime)} -{" "}
-                        {formatTime(course.endTime)}
-                      </span>
-
-                      {expandedCourse === course.id && (
-                        <>
-                          <small>{course.room}</small>
-
-                          <button
-                            className="complete-btn"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleComplete(course.id);
-                            }}
-                          >
-                            {course.completed ? "Completed" : "Mark Complete"}
-                          </button>
-
-                          {course.notes && (
-                            <p className="course-notes">{course.notes}</p>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              );
-            })}
+              })}
+            </div>
           </section>
         )}
         {activeTab === "courses" && (
@@ -742,6 +837,130 @@ function App() {
                       </span>
                     </div>
                   ))
+              )}
+            </div>
+          </section>
+        )}
+
+        {activeTab === "assignments" && (
+          <section className="tab-section">
+            <h2>Assignments</h2>
+
+            <div className="assignment-form">
+              <input
+                type="text"
+                placeholder="Assignment title"
+                id="assignment-title"
+              />
+
+              <input type="date" id="assignment-date" />
+
+              <select id="assignment-course">
+                <option value="">Select Course</option>
+
+                {courseList.map((course) => (
+                  <option key={course.id} value={course.title}>
+                    {course.title}
+                  </option>
+                ))}
+              </select>
+
+              <button onClick={addAssignment}>Add Assignment</button>
+            </div>
+
+            <div className="assignment-list">
+              {assignments.length === 0 ? (
+                <p className="empty-day">No assignments yet.</p>
+              ) : (
+                assignments.map((assignment) => (
+                  <div
+                    className={`assignment-card
+    ${assignment.completed ? "completed-assignment" : ""}
+    ${
+      !assignment.completed && new Date(assignment.dueDate) < new Date()
+        ? "overdue-assignment"
+        : ""
+    }
+  `}
+                    key={assignment.id}
+                  >
+                    <div>
+                      <strong>{assignment.title}</strong>
+
+                      <p>{assignment.course}</p>
+                    </div>
+
+                    <div className="assignment-right">
+                      <span>{assignment.dueDate}</span>
+
+                      <button
+                        className="assignment-complete-btn"
+                        onClick={() => toggleAssignment(assignment.id)}
+                      >
+                        {assignment.completed ? "Completed" : "Mark Done"}
+                      </button>
+
+                      <button
+                        className="assignment-delete-btn"
+                        onClick={() => deleteAssignment(assignment.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
+        )}
+
+        {activeTab === "exams" && (
+          <section className="tab-section">
+            <h2>Exams</h2>
+
+            <div className="exam-form">
+              <input type="text" placeholder="Exam title" id="exam-title" />
+
+              <input type="date" id="exam-date" />
+
+              <select id="exam-course">
+                <option value="">Select Course</option>
+
+                {courseList.map((course) => (
+                  <option key={course.id} value={course.title}>
+                    {course.title}
+                  </option>
+                ))}
+              </select>
+
+              <select id="exam-priority">
+                <option value="low">Low Priority</option>
+                <option value="medium">Medium Priority</option>
+                <option value="high">High Priority</option>
+              </select>
+
+              <button onClick={addExam}>Add Exam</button>
+            </div>
+
+            <div className="exam-list">
+              {exams.length === 0 ? (
+                <p className="empty-day">No exams added yet.</p>
+              ) : (
+                exams.map((exam) => (
+                  <div className="exam-card" key={exam.id}>
+                    <div>
+                      <strong>{exam.title}</strong>
+                      <p>{exam.course}</p>
+                    </div>
+
+                    <div className="exam-right">
+                      <span className={`priority ${exam.priority}`}>
+                        {exam.priority}
+                      </span>
+                      <span>{exam.date}</span>
+                    </div>
+                  </div>
+                ))
               )}
             </div>
           </section>
