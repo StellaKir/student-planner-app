@@ -11,6 +11,7 @@ import {
   Star,
   ClipboardList,
   GraduationCap,
+  Bell,
 } from "lucide-react";
 import { courses } from "./data/courses";
 
@@ -306,6 +307,57 @@ function App() {
     (course) => toMinutes(course.startTime) >= currentMinutes,
   );
 
+  function getDaysUntil(dateString) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const targetDate = new Date(dateString);
+    targetDate.setHours(0, 0, 0, 0);
+
+    const difference = targetDate - today;
+
+    return Math.ceil(difference / (1000 * 60 * 60 * 24));
+  }
+  const upcomingAssignments = assignments
+    .filter((assignment) => {
+      const daysUntil = getDaysUntil(assignment.dueDate);
+      return !assignment.completed && daysUntil >= 0 && daysUntil <= 2;
+    })
+    .sort((a, b) => getDaysUntil(a.dueDate) - getDaysUntil(b.dueDate));
+
+  const upcomingExams = exams
+    .filter((exam) => {
+      const daysUntil = getDaysUntil(exam.date);
+      return daysUntil >= 0 && daysUntil <= 7;
+    })
+    .sort((a, b) => getDaysUntil(a.date) - getDaysUntil(b.date));
+  const remindersCount = upcomingAssignments.length + upcomingExams.length;
+
+  function formatReminderText(type, dateString) {
+    const daysUntil = getDaysUntil(dateString);
+
+    if (daysUntil === 0) {
+      return type === "assignment" ? "Due today" : "Exam today";
+    }
+
+    if (daysUntil === 1) {
+      return type === "assignment" ? "Due tomorrow" : "Exam tomorrow";
+    }
+
+    return type === "assignment"
+      ? `Due in ${daysUntil} days`
+      : `Exam in ${daysUntil} days`;
+  }
+
+  function getReminderStatus(dateString) {
+    const daysUntil = getDaysUntil(dateString);
+
+    if (daysUntil === 0) return "TODAY";
+    if (daysUntil === 1) return "TOMORROW";
+
+    return "UPCOMING";
+  }
+
   function login() {
     const username = document.getElementById("login-username").value;
     const password = document.getElementById("login-password").value;
@@ -514,6 +566,21 @@ function App() {
           </div>
 
           <div className="header-actions">
+            <div
+              className={`notification-pill ${
+                remindersCount === 0 ? "no-reminders" : ""
+              }`}
+            >
+              <Bell size={16} />
+
+              <span>
+                {remindersCount === 0
+                  ? "All caught up"
+                  : `${remindersCount} reminder${
+                      remindersCount > 1 ? "s" : ""
+                    }`}
+              </span>
+            </div>
             <button onClick={openAddModal}>Add Course</button>
 
             <button
@@ -561,6 +628,83 @@ function App() {
                   <span>{course.room}</span>
                 </div>
               ))
+            )}
+          </div>
+        </div>
+
+        <div className="reminders-section">
+          <div className="reminders-header">
+            <h2>Reminders</h2>
+            <span>
+              {upcomingAssignments.length + upcomingExams.length} upcoming
+            </span>
+          </div>
+
+          <div className="reminders-list">
+            {upcomingAssignments.length === 0 && upcomingExams.length === 0 ? (
+              <p className="empty-day">No upcoming reminders 🎉</p>
+            ) : (
+              <>
+                {upcomingAssignments.map((assignment) => (
+                  <div
+                    className="reminder-card assignment-reminder"
+                    key={assignment.id}
+                  >
+                    <div className="reminder-top">
+                      <strong>{assignment.title}</strong>
+
+                      <span
+                        className={`reminder-badge ${
+                          getDaysUntil(assignment.dueDate) === 0
+                            ? "badge-urgent"
+                            : getDaysUntil(assignment.dueDate) === 1
+                              ? "badge-tomorrow"
+                              : "badge-upcoming"
+                        }`}
+                      >
+                        {getReminderStatus(assignment.dueDate)}
+                      </span>
+                    </div>
+                    <p>
+                      Assignment · {assignment.course} ·{" "}
+                      {formatReminderText("assignment", assignment.dueDate)}
+                    </p>
+                  </div>
+                ))}
+
+                {upcomingExams.map((exam) => (
+                  <div
+                    className={`reminder-card exam-reminder ${
+                      getDaysUntil(exam.date) === 0
+                        ? "urgent-reminder"
+                        : getDaysUntil(exam.date) === 1
+                          ? "tomorrow-reminder"
+                          : ""
+                    }`}
+                    key={exam.id}
+                  >
+                    <div className="reminder-top">
+                      <strong>{exam.title}</strong>
+
+                      <span
+                        className={`reminder-badge ${
+                          getDaysUntil(exam.date) === 0
+                            ? "badge-urgent"
+                            : getDaysUntil(exam.date) === 1
+                              ? "badge-tomorrow"
+                              : "badge-upcoming"
+                        }`}
+                      >
+                        {getReminderStatus(exam.date)}
+                      </span>
+                    </div>
+                    <p>
+                      Exam · {exam.course} ·{" "}
+                      {formatReminderText("exam", exam.date)}
+                    </p>
+                  </div>
+                ))}
+              </>
             )}
           </div>
         </div>

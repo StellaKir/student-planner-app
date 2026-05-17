@@ -166,6 +166,22 @@ textarea {
   color: #727790;
 }
 
+.notification-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #eef2ff;
+  color: #4f46e5;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+.no-reminders {
+  background: #dcfce7;
+  color: #166534;
+}
+
 /* =========================
    BUTTONS
 ========================= */
@@ -309,6 +325,104 @@ button:hover {
 .today-card p {
   margin: 0;
   color: #62677b;
+}
+
+/* =========================
+   REMINDERS
+========================= */
+
+.reminders-section {
+  background: white;
+  padding: 22px;
+  border-radius: 22px;
+  margin-bottom: 24px;
+  box-shadow: 0 10px 30px rgba(31, 35, 64, 0.08);
+}
+
+.reminders-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.reminders-header h2 {
+  margin: 0;
+}
+
+.reminders-header span {
+  background: #eef2ff;
+  color: #4f46e5;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.reminders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.reminder-card {
+  padding: 14px 16px;
+  border-radius: 16px;
+}
+
+.reminder-card p {
+  margin: 6px 0 0;
+  color: #62677b;
+}
+
+.assignment-reminder {
+  background: #fff7ed;
+  border-left: 5px solid #f59e0b;
+}
+
+.exam-reminder {
+  background: #fef2f2;
+  border-left: 5px solid #ef4444;
+}
+
+.urgent-reminder {
+  background: #fee2e2;
+  border-left-color: #dc2626;
+}
+
+.tomorrow-reminder {
+  background: #fff7ed;
+  border-left-color: #f97316;
+}
+
+.reminder-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.reminder-badge {
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.badge-urgent {
+  background: #dc2626;
+  color: white;
+}
+
+.badge-tomorrow {
+  background: #f97316;
+  color: white;
+}
+
+.badge-upcoming {
+  background: #6366f1;
+  color: white;
 }
 
 /* =========================
@@ -977,6 +1091,11 @@ textarea:focus {
   border-right-color: #1f2937;
 }
 
+.app.dark .notification-pill {
+  background: #312e81;
+  color: #e0e7ff;
+}
+
 .app.dark .nav-link,
 .app.dark .header p,
 .app.dark .profile-box p,
@@ -1021,6 +1140,11 @@ textarea:focus {
 
 .app.dark .progress-bar {
   background: #374151;
+}
+
+.app.dark .no-reminders {
+  background: #14532d;
+  color: #dcfce7;
 }
 
 .app.dark .daily-load-item,
@@ -1103,6 +1227,20 @@ textarea:focus {
 .app.dark .selected-date {
   border-top-color: #374151;
   color: #cbd5e1;
+}
+
+.app.dark .reminders-section {
+  background: #111827;
+}
+
+.app.dark .reminders-header span {
+  background: #312e81;
+  color: #e0e7ff;
+}
+
+.app.dark .reminder-card strong,
+.app.dark .reminder-card p {
+  color: #111827;
 }
 
 /* =========================
@@ -1234,6 +1372,40 @@ textarea:focus {
     top: 12px;
     right: 12px;
   }
+
+  .notification-pill {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .reminders-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .calendar-wrapper {
+    padding: 18px;
+  }
+
+  .study-calendar .react-calendar__tile {
+    height: 72px !important;
+    font-size: 16px !important;
+    padding-top: 16px !important;
+  }
+
+  .study-calendar .react-calendar__navigation__label {
+    font-size: 22px !important;
+  }
+
+  .study-calendar .react-calendar__navigation {
+    grid-template-columns: 44px 1fr 44px !important;
+  }
+
+  .study-calendar .react-calendar__navigation button {
+    min-width: 40px !important;
+    height: 40px !important;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1247,6 +1419,28 @@ textarea:focus {
 
   .modal {
     width: 100%;
+  }
+
+  .today-section,
+  .reminders-section,
+  .progress-section,
+  .daily-load,
+  .tab-section {
+    padding: 18px;
+  }
+
+  .study-calendar .react-calendar__tile {
+    height: 58px !important;
+    font-size: 14px !important;
+  }
+
+  .calendar-dots {
+    bottom: 8px;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
   }
 }
 
