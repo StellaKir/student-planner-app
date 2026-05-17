@@ -1,9 +1,19 @@
 import "./App.css";
 import { useState, useEffect } from "react";
-import { CalendarDays, BookOpen, StickyNote, Moon, Sun } from "lucide-react";
+import {
+  CalendarDays,
+  BookOpen,
+  StickyNote,
+  Moon,
+  Sun,
+  Star,
+} from "lucide-react";
 import { courses } from "./data/courses";
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+const todayName = new Date().toLocaleDateString("en-US", {
+  weekday: "long",
+});
 
 function App() {
   const [courseList, setCourseList] = useState(() => {
@@ -20,6 +30,7 @@ function App() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [colorFilter, setColorFilter] = useState("all");
 
   const [darkMode, setDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem("darkMode");
@@ -67,6 +78,7 @@ function App() {
     document.getElementById("end").value = "";
     document.getElementById("room").value = "";
     document.getElementById("notes").value = "";
+    document.getElementById("priority").value = "low";
     document.getElementById("color").value = "blue";
   }
 
@@ -86,6 +98,7 @@ function App() {
     const end = document.getElementById("end").value;
     const room = document.getElementById("room").value.trim();
     const notes = document.getElementById("notes").value.trim();
+    const priority = document.getElementById("priority").value;
     const color = document.getElementById("color").value;
 
     if (!title || !start || !end || !room) {
@@ -126,7 +139,9 @@ function App() {
       room,
       notes,
       color,
+      priority,
       completed: existingCourse ? existingCourse.completed : false,
+      favorite: existingCourse ? existingCourse.favorite : false,
     };
 
     if (editingId) {
@@ -174,6 +189,7 @@ function App() {
       document.getElementById("end").value = course.endTime;
       document.getElementById("room").value = course.room;
       document.getElementById("notes").value = course.notes || "";
+      document.getElementById("priority").value = course.priority || "low";
       document.getElementById("color").value = course.color;
     }, 0);
   }
@@ -181,6 +197,14 @@ function App() {
   function toggleComplete(id) {
     const updatedCourses = courseList.map((course) =>
       course.id === id ? { ...course, completed: !course.completed } : course,
+    );
+
+    setCourseList(updatedCourses);
+  }
+
+  function toggleFavorite(id) {
+    const updatedCourses = courseList.map((course) =>
+      course.id === id ? { ...course, favorite: !course.favorite } : course,
     );
 
     setCourseList(updatedCourses);
@@ -201,6 +225,19 @@ function App() {
     setEditingId(null);
   }
 
+  function exportSchedule() {
+    const data = JSON.stringify(courseList, null, 2);
+    const file = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(file);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "student-schedule.json";
+    link.click();
+
+    URL.revokeObjectURL(url);
+  }
+
   const filteredCourses = courseList.filter((course) => {
     const matchesSearch = course.title
       .toLowerCase()
@@ -211,7 +248,9 @@ function App() {
       (statusFilter === "completed" && course.completed) ||
       (statusFilter === "pending" && !course.completed);
 
-    return matchesSearch && matchesStatus;
+    const matchesColor = colorFilter === "all" || course.color === colorFilter;
+
+    return matchesSearch && matchesStatus && matchesColor;
   });
 
   const totalCourses = courseList.length;
@@ -219,11 +258,39 @@ function App() {
     (course) => course.completed,
   ).length;
   const pendingCourses = totalCourses - completedCourses;
+  const totalStudyMinutes = courseList.reduce((total, course) => {
+    return total + (toMinutes(course.endTime) - toMinutes(course.startTime));
+  }, 0);
 
+  const totalStudyHours = Math.round((totalStudyMinutes / 60) * 10) / 10;
+  const dailyStudyLoad = days.map((day) => {
+    const minutes = courseList
+      .filter((course) => course.day === day)
+      .reduce((total, course) => {
+        return (
+          total + (toMinutes(course.endTime) - toMinutes(course.startTime))
+        );
+      }, 0);
+
+    return {
+      day,
+      hours: Math.round((minutes / 60) * 10) / 10,
+    };
+  });
   const progress =
     totalCourses === 0
       ? 0
       : Math.round((completedCourses / totalCourses) * 100);
+
+  const todayCourses = courseList
+    .filter((course) => course.day === todayName)
+    .sort((a, b) => toMinutes(a.startTime) - toMinutes(b.startTime));
+
+  const currentMinutes = new Date().getHours() * 60 + new Date().getMinutes();
+
+  const upcomingCourse = todayCourses.find(
+    (course) => toMinutes(course.startTime) >= currentMinutes,
+  );
 
   function login() {
     const username = document.getElementById("login-username").value;
@@ -309,6 +376,16 @@ function App() {
               Notes
             </>
           </button>
+
+          <button
+            className={
+              activeTab === "favorites" ? "nav-link active" : "nav-link"
+            }
+            onClick={() => setActiveTab("favorites")}
+          >
+            <Star size={18} />
+            Favorites
+          </button>
         </nav>
       </aside>
 
@@ -336,6 +413,10 @@ function App() {
           <div className="header-actions">
             <button onClick={openAddModal}>Add Course</button>
 
+            <button className="export-btn" onClick={exportSchedule}>
+              Export
+            </button>
+
             <button
               className="clear-btn"
               onClick={() => setShowClearModal(true)}
@@ -344,6 +425,46 @@ function App() {
             </button>
           </div>
         </header>
+
+        <div className="today-section">
+          <div className="today-header">
+            <div>
+              <h2>Today's Classes</h2>
+              <p>{todayName}</p>
+            </div>
+            {upcomingCourse && (
+              <div className="upcoming-badge">
+                Next: {upcomingCourse.title} at{" "}
+                {formatTime(upcomingCourse.startTime)}
+              </div>
+            )}
+          </div>
+
+          <div className="today-list">
+            {todayCourses.length === 0 ? (
+              <p className="empty-day">No classes for today 🎉</p>
+            ) : (
+              todayCourses.map((course) => (
+                <div className={`today-card ${course.color}`} key={course.id}>
+                  <div>
+                    <strong>{course.title}</strong>
+
+                    <span className={`priority ${course.priority || "low"}`}>
+                      {course.priority || "low"}
+                    </span>
+
+                    <p>
+                      {formatTime(course.startTime)} -{" "}
+                      {formatTime(course.endTime)}
+                    </p>
+                  </div>
+
+                  <span>{course.room}</span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
 
         <div className="stats">
           <div className="stat-card">
@@ -360,6 +481,11 @@ function App() {
             <span>Pending</span>
             <strong>{pendingCourses}</strong>
           </div>
+
+          <div className="stat-card">
+            <span>Weekly Hours</span>
+            <strong>{totalStudyHours}h</strong>
+          </div>
         </div>
 
         <div className="progress-section">
@@ -373,6 +499,19 @@ function App() {
               className="progress-fill"
               style={{ width: `${progress}%` }}
             ></div>
+          </div>
+        </div>
+
+        <div className="daily-load">
+          <h2>Daily Study Load</h2>
+
+          <div className="daily-load-list">
+            {dailyStudyLoad.map((item) => (
+              <div className="daily-load-item" key={item.day}>
+                <span>{item.day}</span>
+                <strong>{item.hours}h</strong>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -392,6 +531,27 @@ function App() {
             <option value="completed">Completed</option>
             <option value="pending">Pending</option>
           </select>
+          <select
+            value={colorFilter}
+            onChange={(e) => setColorFilter(e.target.value)}
+          >
+            <option value="all">All Colors</option>
+            <option value="blue">Blue</option>
+            <option value="purple">Purple</option>
+            <option value="green">Green</option>
+            <option value="orange">Orange</option>
+          </select>
+
+          <button
+            className="reset-filters-btn"
+            onClick={() => {
+              setSearchTerm("");
+              setStatusFilter("all");
+              setColorFilter("all");
+            }}
+          >
+            Reset
+          </button>
         </div>
 
         {activeTab === "schedule" && (
@@ -405,7 +565,13 @@ function App() {
 
               return (
                 <div className="day" key={day}>
-                  <h3>{day}</h3>
+                  <h3>
+                    {day}
+                    <span className="day-count">
+                      {dayCourses.length}{" "}
+                      {dayCourses.length === 1 ? "class" : "classes"}
+                    </span>
+                  </h3>
 
                   {dayCourses.length === 0 && (
                     <p className="empty-day">No classes scheduled</p>
@@ -419,6 +585,19 @@ function App() {
                       key={course.id}
                       onClick={() => toggleExpand(course.id)}
                     >
+                      <button
+                        className={
+                          course.favorite
+                            ? "favorite-btn active"
+                            : "favorite-btn"
+                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleFavorite(course.id);
+                        }}
+                      >
+                        ★
+                      </button>
                       <button
                         className="delete-btn"
                         onClick={(e) => {
@@ -440,6 +619,10 @@ function App() {
                       </button>
 
                       <strong>{course.title}</strong>
+
+                      <span className={`priority ${course.priority || "low"}`}>
+                        {course.priority || "low"}
+                      </span>
 
                       <span>
                         {formatTime(course.startTime)} -{" "}
@@ -527,6 +710,42 @@ function App() {
             </div>
           </section>
         )}
+
+        {activeTab === "favorites" && (
+          <section className="tab-section">
+            <h2>Favorite Courses</h2>
+
+            <div className="course-list">
+              {courseList.filter((course) => course.favorite).length === 0 ? (
+                <p className="empty-day">No favorite courses yet.</p>
+              ) : (
+                courseList
+                  .filter((course) => course.favorite)
+                  .map((course) => (
+                    <div
+                      className={`list-card ${course.color}`}
+                      key={course.id}
+                    >
+                      <div>
+                        <strong>{course.title}</strong>
+                        <p>
+                          {course.day} · {formatTime(course.startTime)} -{" "}
+                          {formatTime(course.endTime)}
+                        </p>
+                        <small>{course.room}</small>
+                      </div>
+
+                      <span
+                        className={course.completed ? "status done" : "status"}
+                      >
+                        {course.completed ? "Completed" : "Pending"}
+                      </span>
+                    </div>
+                  ))
+              )}
+            </div>
+          </section>
+        )}
       </main>
 
       {showFormModal && (
@@ -582,6 +801,12 @@ function App() {
               <input placeholder="Room" id="room" />
 
               <textarea placeholder="Notes..." id="notes" rows="3"></textarea>
+
+              <select id="priority">
+                <option value="low">Low Priority</option>
+                <option value="medium">Medium Priority</option>
+                <option value="high">High Priority</option>
+              </select>
 
               <select id="color">
                 <option value="blue">Blue</option>
