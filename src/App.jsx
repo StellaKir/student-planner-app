@@ -525,7 +525,7 @@ function App() {
     return (
       <div className="login-page">
         <div className="login-card">
-          <h1>StudyPlan</h1>
+          <h1>Planoras</h1>
 
           <p>Sign in to manage your university schedule</p>
 
@@ -549,7 +549,7 @@ function App() {
         {darkMode ? <Sun size={18} /> : <Moon size={18} />}
       </button>
       <aside className="sidebar">
-        <h2>StudyPlan</h2>
+        <h2>Planoras</h2>
 
         <nav>
           <button
@@ -618,51 +618,202 @@ function App() {
 
       <main className="main">
         <header className="header">
-          <div className="header-left">
-            <div>
-              <h1>My Schedule</h1>
-              <p>Organize your weekly university classes</p>
-            </div>
-
-            <div className="profile-box">
-              <div className="avatar">{username.charAt(0).toUpperCase()}</div>
-
-              <div>
-                <strong>{username}</strong>
-                <p>Student</p>
-                <button className="profile-logout-btn" onClick={logout}>
-                  Logout
-                </button>
-              </div>
-            </div>
+          <div>
+            <h1>Good morning, {username}! 👋</h1>
+            <p>Here's what's happening today.</p>
           </div>
 
           <div className="header-actions">
-            <div
-              className={`notification-pill ${
-                remindersCount === 0 ? "no-reminders" : ""
-              }`}
-            >
-              <Bell size={16} />
-
-              <span>
-                {remindersCount === 0
-                  ? "All caught up"
-                  : `${remindersCount} reminder${
-                      remindersCount > 1 ? "s" : ""
-                    }`}
-              </span>
-            </div>
-            <button onClick={openAddModal}>Add Course</button>
-
-            <button
-              className="clear-btn"
-              onClick={() => setShowClearModal(true)}
-            >
-              Clear All
-            </button>
+            <button onClick={openAddModal}>+ Add New</button>
           </div>
         </header>
+
+        <div className="dashboard-cards">
+          <div className="dashboard-card purple-card">
+            <div className="card-icon">📅</div>
+            <div>
+              <span>Today's Classes</span>
+              <strong>{todayCourses.length}</strong>
+              <p>View schedule →</p>
+            </div>
+          </div>
+
+          <div className="dashboard-card green-card">
+            <div className="card-icon">✅</div>
+            <div>
+              <span>Assignments</span>
+              <strong>{pendingAssignments}</strong>
+              <p>{pendingAssignments} pending</p>
+            </div>
+          </div>
+
+          <div className="dashboard-card orange-card">
+            <div className="card-icon">🎓</div>
+            <div>
+              <span>Exams</span>
+              <strong>{exams.length}</strong>
+              <p>{upcomingExams.length} in the next 7 days</p>
+            </div>
+          </div>
+
+          <div className="dashboard-card blue-card">
+            <div className="card-icon">🕒</div>
+            <div>
+              <span>Study Time</span>
+              <strong>{totalStudyHours}h</strong>
+              <p>This week</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="dashboard-grid">
+          <div className="dashboard-panel today-panel">
+            <div className="panel-header">
+              <h2>Today's Schedule</h2>
+              <span>View full schedule →</span>
+            </div>
+
+            <div className="timeline-list">
+              {todayCourses.length === 0 ? (
+                <p className="empty-day">No classes for today 🎉</p>
+              ) : (
+                todayCourses.map((course) => (
+                  <div
+                    className={`timeline-card ${course.color}`}
+                    key={course.id}
+                  >
+                    <div className="timeline-time">
+                      {formatTime(course.startTime)}
+                      <br />
+                      {formatTime(course.endTime)}
+                    </div>
+
+                    <div className="timeline-info">
+                      <strong>{course.title}</strong>
+                      <p>{course.room}</p>
+                    </div>
+
+                    <span className="status">Upcoming</span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="dashboard-panel week-panel">
+            <div className="panel-header">
+              <h2>This Week Overview</h2>
+            </div>
+
+            <div className="week-grid">
+              {days.map((day) => {
+                const dayCourses = courseList.filter(
+                  (course) => course.day === day,
+                );
+
+                return (
+                  <div className="week-day" key={day}>
+                    <strong>{day.slice(0, 3)}</strong>
+
+                    {dayCourses.map((course) => (
+                      <div
+                        className={`mini-course ${course.color}`}
+                        key={course.id}
+                      >
+                        <span>{course.title}</span>
+                        <small>
+                          {formatTime(course.startTime)} -{" "}
+                          {formatTime(course.endTime)}
+                        </small>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="dashboard-panel progress-panel">
+            <h2>Study Progress</h2>
+
+            <div className="circle-progress">
+              <div>
+                <strong>{progress}%</strong>
+                <span>Weekly Goal</span>
+              </div>
+            </div>
+
+            <div className="progress-details">
+              <p>● {totalStudyHours}h Completed</p>
+              <p>● {pendingCourses} Pending</p>
+              <p>● {totalCourses} Courses</p>
+            </div>
+          </div>
+
+          <div className="dashboard-panel reminders-panel">
+            <div className="panel-header">
+              <h2>Reminders</h2>
+              <span>View all →</span>
+            </div>
+
+            {upcomingAssignments.length === 0 && upcomingExams.length === 0 ? (
+              <p className="empty-day">No upcoming reminders 🎉</p>
+            ) : (
+              <>
+                {upcomingAssignments.map((assignment) => (
+                  <div className="small-reminder" key={assignment.id}>
+                    <span>🔔</span>
+                    <div>
+                      <strong>{assignment.title}</strong>
+                      <p>
+                        {formatReminderText("assignment", assignment.dueDate)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+
+                {upcomingExams.map((exam) => (
+                  <div className="small-reminder" key={exam.id}>
+                    <span>🎓</span>
+                    <div>
+                      <strong>{exam.title}</strong>
+                      <p>{formatReminderText("exam", exam.date)}</p>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+
+          <div className="dashboard-panel deadlines-panel">
+            <h2>Upcoming Deadlines</h2>
+
+            {[...assignments]
+              .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+              .slice(0, 4)
+              .map((assignment) => (
+                <div className="deadline-row" key={assignment.id}>
+                  <span>📌 {assignment.title}</span>
+                  <small>{assignment.dueDate}</small>
+                </div>
+              ))}
+          </div>
+
+          <div className="dashboard-panel quick-panel">
+            <h2>Quick Actions</h2>
+
+            <div className="quick-actions">
+              <button onClick={() => setActiveTab("assignments")}>
+                ＋ Add Assignment
+              </button>
+              <button onClick={() => setActiveTab("exams")}>＋ Add Exam</button>
+              <button onClick={() => setActiveTab("notes")}>＋ Add Note</button>
+              <button onClick={() => setActiveTab("calendar")}>
+                ＋ Calendar
+              </button>
+            </div>
+          </div>
+        </div>
 
         {activeTab === "schedule" && (
           <>
@@ -786,33 +937,6 @@ function App() {
                     ))}
                   </>
                 )}
-              </div>
-            </div>
-
-            <div className="stats">
-              <div className="stat-card">
-                <span>Total Courses</span>
-                <strong>{totalCourses}</strong>
-              </div>
-
-              <div className="stat-card">
-                <span>Completed</span>
-                <strong>{completedCourses}</strong>
-              </div>
-
-              <div className="stat-card">
-                <span>Pending</span>
-                <strong>{pendingCourses}</strong>
-              </div>
-
-              <div className="stat-card">
-                <span>Weekly Hours</span>
-                <strong>{totalStudyHours}h</strong>
-              </div>
-
-              <div className="stat-card">
-                <span>Assignments</span>
-                <strong>{pendingAssignments}</strong>
               </div>
             </div>
 
