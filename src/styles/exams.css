@@ -1,0 +1,63 @@
+/* =========================
+   EXAMS
+========================= */
+
+.exam-form {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.exam-form input,
+.exam-form select {
+  padding: 13px 15px;
+  border-radius: 14px;
+  border: 1px solid #dbe2ea;
+  background: white;
+  font-size: 14px;
+}
+
+.exam-form input:focus,
+.exam-form select:focus {
+  outline: none;
+  border-color: #6c63ff;
+  box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.12);
+}
+
+.exam-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.exam-card {
+  background: #f8fafc;
+  border-radius: 18px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: center;
+}
+
+.exam-card strong {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.exam-card p {
+  margin: 6px 0;
+  color: #64748b;
+}
+
+.exam-card small {
+  color: #64748b;
+}
+
+.exam-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}

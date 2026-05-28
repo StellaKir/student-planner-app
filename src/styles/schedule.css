@@ -1,0 +1,215 @@
+/* =========================
+   SEARCH / FILTERS
+========================= */
+
+.search-box {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.search-box input,
+.search-box select {
+  padding: 13px 15px;
+  border-radius: 14px;
+  border: 1px solid #dbe2ea;
+  background: white;
+  font-size: 14px;
+}
+
+.search-box input {
+  flex: 1;
+  min-width: 260px;
+}
+
+.search-box input:focus,
+.search-box select:focus {
+  outline: none;
+  border-color: #6c63ff;
+  box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.12);
+}
+
+.reset-filters-btn {
+  background: #eef2ff;
+  color: #6c63ff;
+}
+
+/* =========================
+   SCHEDULE GRID
+========================= */
+
+.tab-section {
+  background: white;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.06);
+}
+
+.schedule {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 18px;
+}
+
+.day {
+  background: #f8fafc;
+  border-radius: 20px;
+  padding: 18px;
+  min-height: 420px;
+}
+
+.day h3 {
+  margin-top: 0;
+  margin-bottom: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.day-count {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.empty-day {
+  color: #94a3b8;
+  text-align: center;
+  margin-top: 32px;
+}
+
+/* =========================
+   COURSE CARD
+========================= */
+
+.course {
+  position: relative;
+  border-radius: 18px;
+  padding: 44px 16px 16px;
+  margin-bottom: 14px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.course:hover {
+  transform: translateY(-2px);
+}
+
+.course strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+
+.course span {
+  display: inline-block;
+}
+
+.course small {
+  display: block;
+  margin-top: 10px;
+  color: #475569;
+}
+
+.course-notes {
+  margin-top: 12px;
+  line-height: 1.5;
+  color: #475569;
+}
+
+/* =========================
+   PRIORITIES
+========================= */
+
+.priority {
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: capitalize;
+  margin-bottom: 10px;
+}
+
+.priority.low {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.priority.medium {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.priority.high {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* =========================
+   COURSE COLORS
+========================= */
+
+.course.blue,
+.today-card.blue {
+  background: #dbeafe;
+  border-left: 5px solid #3b82f6;
+}
+
+.course.purple,
+.today-card.purple {
+  background: #ede9fe;
+  border-left: 5px solid #8b5cf6;
+}
+
+.course.green,
+.today-card.green {
+  background: #dcfce7;
+  border-left: 5px solid #22c55e;
+}
+
+.course.orange,
+.today-card.orange {
+  background: #ffedd5;
+  border-left: 5px solid #f97316;
+}
+
+/* =========================
+   ACTION BUTTONS
+========================= */
+
+.favorite-btn,
+.delete-btn,
+.edit-btn {
+  position: absolute;
+  top: 10px;
+  border: none;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.favorite-btn {
+  left: 10px;
+  padding: 4px 8px;
+}
+
+.favorite-btn.active {
+  color: #f59e0b;
+}
+
+.delete-btn {
+  right: 10px;
+  padding: 2px 8px;
+  font-size: 18px;
+}
+
+.edit-btn {
+  right: 42px;
+  padding: 5px 9px;
+  font-size: 11px;
+}
+
+.complete-btn {
+  margin-top: 14px;
+  width: 100%;
+}

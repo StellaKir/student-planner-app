@@ -1,0 +1,126 @@
+/* =========================
+   DARK MODE
+========================= */
+
+.app.dark {
+  background: #0f172a;
+  color: #e5e7eb;
+}
+
+/* sidebar */
+
+.app.dark .sidebar {
+  background: #111827;
+  border-right-color: #1f2937;
+}
+
+.app.dark .sidebar h2 {
+  color: #a78bfa;
+}
+
+.app.dark .nav-link {
+  color: #cbd5e1;
+}
+
+.app.dark .nav-link:hover {
+  background: #1e293b;
+}
+
+/* header */
+
+.app.dark .header h1 {
+  color: #f9fafb;
+}
+
+.app.dark .header p {
+  color: #94a3b8;
+}
+
+/* sections */
+
+.app.dark .tab-section,
+.app.dark .today-section,
+.app.dark .reminders-section,
+.app.dark .progress-section,
+.app.dark .daily-load,
+.app.dark .calendar-wrapper {
+  background: #111827;
+  color: #e5e7eb;
+}
+
+/* cards */
+
+.app.dark .dashboard-card,
+.app.dark .assignment-card,
+.app.dark .exam-card,
+.app.dark .note-card,
+.app.dark .daily-load-item,
+.app.dark .assignment-stat-card,
+.app.dark .day {
+  background: #1f2937;
+  color: #f9fafb;
+}
+
+/* inputs */
+
+.app.dark input,
+.app.dark select,
+.app.dark textarea {
+  background: #1f2937;
+  color: #f9fafb;
+  border-color: #334155;
+}
+
+/* text */
+
+.app.dark .empty-day,
+.app.dark .today-header p,
+.app.dark .selected-date,
+.app.dark .assignment-card small,
+.app.dark .exam-card small,
+.app.dark .note-card span,
+.app.dark .daily-load-item span {
+  color: #94a3b8;
+}
+
+.app.dark .assignment-notes,
+.app.dark .course-notes,
+.app.dark .note-card p {
+  color: #cbd5e1;
+}
+
+/* calendar */
+
+.app.dark .study-calendar .react-calendar__tile {
+  background: #1f2937;
+  border-color: #334155;
+  color: #f9fafb;
+}
+
+.app.dark .study-calendar .react-calendar__navigation button {
+  color: #f9fafb;
+}
+
+.app.dark .study-calendar .react-calendar__tile:hover {
+  background: #334155;
+}
+
+/* buttons */
+
+.app.dark .reset-filters-btn {
+  background: #312e81;
+  color: #e0e7ff;
+}
+
+.app.dark .complete-btn,
+.app.dark .assignment-complete-btn {
+  background: #6366f1;
+}
+
+.app.dark .assignment-edit-btn {
+  background: #8b5cf6;
+}
+
+.app.dark .assignment-delete-btn {
+  background: #dc2626;
+}

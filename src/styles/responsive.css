@@ -1,0 +1,138 @@
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 1200px) {
+  .dashboard-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .schedule {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .daily-load-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .app {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    position: relative;
+    border-right: none;
+    border-bottom: 1px solid #e6e8f0;
+  }
+
+  .sidebar nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .nav-link {
+    width: calc(50% - 6px);
+  }
+
+  .main {
+    padding: 20px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-actions {
+    width: 100%;
+  }
+
+  .header-actions button {
+    width: 100%;
+  }
+
+  .dashboard-cards,
+  .schedule,
+  .daily-load-list,
+  .assignment-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .search-box,
+  .assignment-form,
+  .exam-form {
+    flex-direction: column;
+  }
+
+  .search-box input,
+  .search-box select,
+  .assignment-form input,
+  .assignment-form select,
+  .assignment-form textarea,
+  .exam-form input,
+  .exam-form select {
+    width: 100%;
+  }
+
+  .assignment-card,
+  .exam-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .assignment-right,
+  .exam-right {
+    width: 100%;
+  }
+
+  .assignment-right button,
+  .exam-right button {
+    flex: 1;
+  }
+
+  .day {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .main {
+    padding: 16px;
+  }
+
+  .header h1 {
+    font-size: 26px;
+  }
+
+  .dashboard-card {
+    padding: 18px;
+  }
+
+  .dashboard-card strong {
+    font-size: 26px;
+  }
+
+  .card-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+
+  .today-section,
+  .reminders-section,
+  .progress-section,
+  .daily-load,
+  .tab-section,
+  .calendar-wrapper {
+    padding: 18px;
+  }
+
+  .nav-link {
+    width: 100%;
+  }
+}

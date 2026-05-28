@@ -1,0 +1,37 @@
+/* =========================
+   GLOBAL / LAYOUT
+========================= */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f6f7fb;
+  color: #1f2340;
+  width: 100%;
+  min-height: 100vh;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+.app {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  background: #f6f7fb;
+}
+
+.main {
+  flex: 1;
+  width: 100%;
+  padding: 36px;
+  overflow-x: hidden;
+}

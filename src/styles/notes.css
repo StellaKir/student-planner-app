@@ -1,0 +1,73 @@
+/* =========================
+   NOTES
+========================= */
+
+.note-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.note-form select,
+.note-form textarea,
+.note-form input {
+  padding: 13px 15px;
+  border-radius: 14px;
+  border: 1px solid #dbe2ea;
+  background: white;
+  font-size: 14px;
+}
+
+.note-form textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.note-form select:focus,
+.note-form textarea:focus,
+.note-form input:focus {
+  outline: none;
+  border-color: #6c63ff;
+  box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.12);
+}
+
+.notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.note-card {
+  background: #f8fafc;
+  border-radius: 18px;
+  padding: 20px;
+}
+
+.note-card div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  gap: 12px;
+}
+
+.note-card strong {
+  font-size: 16px;
+}
+
+.note-card span {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.note-card p {
+  margin: 0 0 12px;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.note-card small {
+  color: #6c63ff;
+  font-weight: 700;
+}

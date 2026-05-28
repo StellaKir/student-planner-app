@@ -1,5 +1,16 @@
 import "react-calendar/dist/Calendar.css";
 import "./App.css";
+import "./styles/layout.css";
+import "./styles/sidebar.css";
+import "./styles/header.css";
+import "./styles/dashboard.css";
+import "./styles/schedule.css";
+import "./styles/assignments.css";
+import "./styles/notes.css";
+import "./styles/exams.css";
+import "./styles/calendar.css";
+import "./styles/responsive.css";
+import "./styles/darkmode.css";
 import { useState, useEffect } from "react";
 import Calendar from "react-calendar";
 import { Moon, Sun } from "lucide-react";
