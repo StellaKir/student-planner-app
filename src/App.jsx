@@ -33,6 +33,7 @@ function App() {
   const [showFormModal, setShowFormModal] = useState(false);
   const [activeTab, setActiveTab] = useState("schedule");
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [editingAssignmentId, setEditingAssignmentId] = useState(null);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -53,6 +54,11 @@ function App() {
     const saved = localStorage.getItem("exams");
     return saved ? JSON.parse(saved) : [];
   });
+  const [notes, setNotes] = useState(() => {
+    const saved = localStorage.getItem("notes");
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     return localStorage.getItem("loggedIn") === "true";
   });
@@ -71,6 +77,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem("exams", JSON.stringify(exams));
   }, [exams]);
+
+  useEffect(() => {
+    localStorage.setItem("notes", JSON.stringify(notes));
+  }, [notes]);
 
   useEffect(() => {
     localStorage.setItem("darkMode", darkMode);
@@ -425,10 +435,59 @@ function App() {
     document.getElementById("exam-priority").value = "medium";
   }
 
+  function editAssignment(assignment) {
+    document.getElementById("assignment-title").value = assignment.title;
+    document.getElementById("assignment-date").value = assignment.dueDate;
+    document.getElementById("assignment-course").value = assignment.course;
+    document.getElementById("assignment-notes").value = assignment.notes || "";
+
+    setEditingAssignmentId(assignment.id);
+  }
+
+  function cancelAssignmentEdit() {
+    setEditingAssignmentId(null);
+
+    document.getElementById("assignment-title").value = "";
+    document.getElementById("assignment-date").value = "";
+    document.getElementById("assignment-course").value = "";
+    document.getElementById("assignment-notes").value = "";
+  }
+
+  function addNote() {
+    const course = document.getElementById("note-course").value;
+    const text = document.getElementById("note-text").value.trim();
+    const fileInput = document.getElementById("note-file");
+    const fileName = fileInput.files[0] ? fileInput.files[0].name : "";
+
+    if (!course || !text) {
+      alert("Please select a course and write a note.");
+      return;
+    }
+
+    const newNote = {
+      id: Date.now(),
+      course,
+      text,
+      fileName,
+      createdAt: new Date().toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      }),
+    };
+
+    setNotes([...notes, newNote]);
+
+    document.getElementById("note-course").value = "";
+    document.getElementById("note-text").value = "";
+    document.getElementById("note-file").value = "";
+  }
+
   function addAssignment() {
     const title = document.getElementById("assignment-title").value.trim();
     const dueDate = document.getElementById("assignment-date").value;
     const course = document.getElementById("assignment-course").value;
+    const notes = document.getElementById("assignment-notes").value.trim();
 
     if (!title || !dueDate || !course) {
       alert("Please fill in all fields.");
@@ -436,17 +495,30 @@ function App() {
     }
 
     const newAssignment = {
-      id: Date.now(),
+      id: editingAssignmentId || Date.now(),
       title,
       dueDate,
       course,
-      completed: false,
+      notes,
+      completed: editingAssignmentId
+        ? assignments.find((a) => a.id === editingAssignmentId)?.completed
+        : false,
     };
+    if (editingAssignmentId) {
+      setAssignments(
+        assignments.map((assignment) =>
+          assignment.id === editingAssignmentId ? newAssignment : assignment,
+        ),
+      );
 
-    setAssignments([...assignments, newAssignment]);
+      setEditingAssignmentId(null);
+    } else {
+      setAssignments([...assignments, newAssignment]);
+    }
 
     document.getElementById("assignment-title").value = "";
     document.getElementById("assignment-date").value = "";
+    document.getElementById("assignment-notes").value = "";
   }
 
   if (!isLoggedIn) {
@@ -592,281 +664,32 @@ function App() {
           </div>
         </header>
 
-        <div className="today-section">
-          <div className="today-header">
-            <div>
-              <h2>Today's Classes</h2>
-              <p>{todayName}</p>
-            </div>
-            {upcomingCourse && (
-              <div className="upcoming-badge">
-                Next: {upcomingCourse.title} at{" "}
-                {formatTime(upcomingCourse.startTime)}
-              </div>
-            )}
-          </div>
-
-          <div className="today-list">
-            {todayCourses.length === 0 ? (
-              <p className="empty-day">No classes for today 🎉</p>
-            ) : (
-              todayCourses.map((course) => (
-                <div className={`today-card ${course.color}`} key={course.id}>
-                  <div>
-                    <strong>{course.title}</strong>
-
-                    <span className={`priority ${course.priority || "low"}`}>
-                      {course.priority || "low"}
-                    </span>
-
-                    <p>
-                      {formatTime(course.startTime)} -{" "}
-                      {formatTime(course.endTime)}
-                    </p>
-                  </div>
-
-                  <span>{course.room}</span>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        <div className="reminders-section">
-          <div className="reminders-header">
-            <h2>Reminders</h2>
-            <span>
-              {upcomingAssignments.length + upcomingExams.length} upcoming
-            </span>
-          </div>
-
-          <div className="reminders-list">
-            {upcomingAssignments.length === 0 && upcomingExams.length === 0 ? (
-              <p className="empty-day">No upcoming reminders 🎉</p>
-            ) : (
-              <>
-                {upcomingAssignments.map((assignment) => (
-                  <div
-                    className="reminder-card assignment-reminder"
-                    key={assignment.id}
-                  >
-                    <div className="reminder-top">
-                      <strong>{assignment.title}</strong>
-
-                      <span
-                        className={`reminder-badge ${
-                          getDaysUntil(assignment.dueDate) === 0
-                            ? "badge-urgent"
-                            : getDaysUntil(assignment.dueDate) === 1
-                              ? "badge-tomorrow"
-                              : "badge-upcoming"
-                        }`}
-                      >
-                        {getReminderStatus(assignment.dueDate)}
-                      </span>
-                    </div>
-                    <p>
-                      Assignment · {assignment.course} ·{" "}
-                      {formatReminderText("assignment", assignment.dueDate)}
-                    </p>
-                  </div>
-                ))}
-
-                {upcomingExams.map((exam) => (
-                  <div
-                    className={`reminder-card exam-reminder ${
-                      getDaysUntil(exam.date) === 0
-                        ? "urgent-reminder"
-                        : getDaysUntil(exam.date) === 1
-                          ? "tomorrow-reminder"
-                          : ""
-                    }`}
-                    key={exam.id}
-                  >
-                    <div className="reminder-top">
-                      <strong>{exam.title}</strong>
-
-                      <span
-                        className={`reminder-badge ${
-                          getDaysUntil(exam.date) === 0
-                            ? "badge-urgent"
-                            : getDaysUntil(exam.date) === 1
-                              ? "badge-tomorrow"
-                              : "badge-upcoming"
-                        }`}
-                      >
-                        {getReminderStatus(exam.date)}
-                      </span>
-                    </div>
-                    <p>
-                      Exam · {exam.course} ·{" "}
-                      {formatReminderText("exam", exam.date)}
-                    </p>
-                  </div>
-                ))}
-              </>
-            )}
-          </div>
-        </div>
-
-        <div className="stats">
-          <div className="stat-card">
-            <span>Total Courses</span>
-            <strong>{totalCourses}</strong>
-          </div>
-
-          <div className="stat-card">
-            <span>Completed</span>
-            <strong>{completedCourses}</strong>
-          </div>
-
-          <div className="stat-card">
-            <span>Pending</span>
-            <strong>{pendingCourses}</strong>
-          </div>
-
-          <div className="stat-card">
-            <span>Weekly Hours</span>
-            <strong>{totalStudyHours}h</strong>
-          </div>
-
-          <div className="stat-card">
-            <span>Assignments</span>
-            <strong>{pendingAssignments}</strong>
-          </div>
-        </div>
-
-        <div className="progress-section">
-          <div className="progress-header">
-            <span>Course Progress</span>
-            <strong>{progress}%</strong>
-          </div>
-
-          <div className="progress-bar">
-            <div
-              className="progress-fill"
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
-        </div>
-
-        <div className="daily-load">
-          <h2>Daily Study Load</h2>
-
-          <div className="daily-load-list">
-            {dailyStudyLoad.map((item) => (
-              <div className="daily-load-item" key={item.day}>
-                <span>{item.day}</span>
-                <strong>{item.hours}h</strong>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="search-box">
-          <input
-            type="text"
-            placeholder="Search courses..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="all">All</option>
-            <option value="completed">Completed</option>
-            <option value="pending">Pending</option>
-          </select>
-          <select
-            value={colorFilter}
-            onChange={(e) => setColorFilter(e.target.value)}
-          >
-            <option value="all">All Colors</option>
-            <option value="blue">Blue</option>
-            <option value="purple">Purple</option>
-            <option value="green">Green</option>
-            <option value="orange">Orange</option>
-          </select>
-
-          <button
-            className="reset-filters-btn"
-            onClick={() => {
-              setSearchTerm("");
-              setStatusFilter("all");
-              setColorFilter("all");
-            }}
-          >
-            Reset
-          </button>
-        </div>
-
         {activeTab === "schedule" && (
-          <section className="tab-section">
-            <div className="schedule">
-              {days.map((day) => {
-                const dayCourses = filteredCourses
-                  .filter((course) => course.day === day)
-                  .sort(
-                    (a, b) => toMinutes(a.startTime) - toMinutes(b.startTime),
-                  );
+          <>
+            <div className="today-section">
+              <div className="today-header">
+                <div>
+                  <h2>Today's Classes</h2>
+                  <p>{todayName}</p>
+                </div>
+                {upcomingCourse && (
+                  <div className="upcoming-badge">
+                    Next: {upcomingCourse.title} at{" "}
+                    {formatTime(upcomingCourse.startTime)}
+                  </div>
+                )}
+              </div>
 
-                return (
-                  <div className="day" key={day}>
-                    <h3>
-                      {day}
-                      <span className="day-count">
-                        {dayCourses.length}{" "}
-                        {dayCourses.length === 1 ? "class" : "classes"}
-                      </span>
-                    </h3>
-
-                    {dayCourses.length === 0 && (
-                      <p className="empty-day">No classes scheduled</p>
-                    )}
-
-                    {dayCourses.map((course) => (
-                      <div
-                        className={`course ${course.color} ${
-                          course.completed ? "completed-course" : ""
-                        }`}
-                        key={course.id}
-                        onClick={() => toggleExpand(course.id)}
-                      >
-                        <button
-                          className={
-                            course.favorite
-                              ? "favorite-btn active"
-                              : "favorite-btn"
-                          }
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleFavorite(course.id);
-                          }}
-                        >
-                          ★
-                        </button>
-                        <button
-                          className="delete-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteCourse(course.id);
-                          }}
-                        >
-                          ×
-                        </button>
-
-                        <button
-                          className="edit-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            editCourse(course);
-                          }}
-                        >
-                          Edit
-                        </button>
-
+              <div className="today-list">
+                {todayCourses.length === 0 ? (
+                  <p className="empty-day">No classes for today 🎉</p>
+                ) : (
+                  todayCourses.map((course) => (
+                    <div
+                      className={`today-card ${course.color}`}
+                      key={course.id}
+                    >
+                      <div>
                         <strong>{course.title}</strong>
 
                         <span
@@ -875,38 +698,298 @@ function App() {
                           {course.priority || "low"}
                         </span>
 
-                        <span>
+                        <p>
                           {formatTime(course.startTime)} -{" "}
                           {formatTime(course.endTime)}
-                        </span>
+                        </p>
+                      </div>
 
-                        {expandedCourse === course.id && (
-                          <>
-                            <small>{course.room}</small>
+                      <span>{course.room}</span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
 
-                            <button
-                              className="complete-btn"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleComplete(course.id);
-                              }}
-                            >
-                              {course.completed ? "Completed" : "Mark Complete"}
-                            </button>
+            <div className="reminders-section">
+              <div className="reminders-header">
+                <h2>Reminders</h2>
+                <span>
+                  {upcomingAssignments.length + upcomingExams.length} upcoming
+                </span>
+              </div>
 
-                            {course.notes && (
-                              <p className="course-notes">{course.notes}</p>
-                            )}
-                          </>
-                        )}
+              <div className="reminders-list">
+                {upcomingAssignments.length === 0 &&
+                upcomingExams.length === 0 ? (
+                  <p className="empty-day">No upcoming reminders 🎉</p>
+                ) : (
+                  <>
+                    {upcomingAssignments.map((assignment) => (
+                      <div
+                        className="reminder-card assignment-reminder"
+                        key={assignment.id}
+                      >
+                        <div className="reminder-top">
+                          <strong>{assignment.title}</strong>
+
+                          <span
+                            className={`reminder-badge ${
+                              getDaysUntil(assignment.dueDate) === 0
+                                ? "badge-urgent"
+                                : getDaysUntil(assignment.dueDate) === 1
+                                  ? "badge-tomorrow"
+                                  : "badge-upcoming"
+                            }`}
+                          >
+                            {getReminderStatus(assignment.dueDate)}
+                          </span>
+                        </div>
+                        <p>
+                          Assignment · {assignment.course} ·{" "}
+                          {formatReminderText("assignment", assignment.dueDate)}
+                        </p>
                       </div>
                     ))}
-                  </div>
-                );
-              })}
+
+                    {upcomingExams.map((exam) => (
+                      <div
+                        className={`reminder-card exam-reminder ${
+                          getDaysUntil(exam.date) === 0
+                            ? "urgent-reminder"
+                            : getDaysUntil(exam.date) === 1
+                              ? "tomorrow-reminder"
+                              : ""
+                        }`}
+                        key={exam.id}
+                      >
+                        <div className="reminder-top">
+                          <strong>{exam.title}</strong>
+
+                          <span
+                            className={`reminder-badge ${
+                              getDaysUntil(exam.date) === 0
+                                ? "badge-urgent"
+                                : getDaysUntil(exam.date) === 1
+                                  ? "badge-tomorrow"
+                                  : "badge-upcoming"
+                            }`}
+                          >
+                            {getReminderStatus(exam.date)}
+                          </span>
+                        </div>
+                        <p>
+                          Exam · {exam.course} ·{" "}
+                          {formatReminderText("exam", exam.date)}
+                        </p>
+                      </div>
+                    ))}
+                  </>
+                )}
+              </div>
             </div>
-          </section>
+
+            <div className="stats">
+              <div className="stat-card">
+                <span>Total Courses</span>
+                <strong>{totalCourses}</strong>
+              </div>
+
+              <div className="stat-card">
+                <span>Completed</span>
+                <strong>{completedCourses}</strong>
+              </div>
+
+              <div className="stat-card">
+                <span>Pending</span>
+                <strong>{pendingCourses}</strong>
+              </div>
+
+              <div className="stat-card">
+                <span>Weekly Hours</span>
+                <strong>{totalStudyHours}h</strong>
+              </div>
+
+              <div className="stat-card">
+                <span>Assignments</span>
+                <strong>{pendingAssignments}</strong>
+              </div>
+            </div>
+
+            <div className="progress-section">
+              <div className="progress-header">
+                <span>Course Progress</span>
+                <strong>{progress}%</strong>
+              </div>
+
+              <div className="progress-bar">
+                <div
+                  className="progress-fill"
+                  style={{ width: `${progress}%` }}
+                ></div>
+              </div>
+            </div>
+
+            <div className="daily-load">
+              <h2>Daily Study Load</h2>
+
+              <div className="daily-load-list">
+                {dailyStudyLoad.map((item) => (
+                  <div className="daily-load-item" key={item.day}>
+                    <span>{item.day}</span>
+                    <strong>{item.hours}h</strong>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="search-box">
+              <input
+                type="text"
+                placeholder="Search courses..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="all">All</option>
+                <option value="completed">Completed</option>
+                <option value="pending">Pending</option>
+              </select>
+              <select
+                value={colorFilter}
+                onChange={(e) => setColorFilter(e.target.value)}
+              >
+                <option value="all">All Colors</option>
+                <option value="blue">Blue</option>
+                <option value="purple">Purple</option>
+                <option value="green">Green</option>
+                <option value="orange">Orange</option>
+              </select>
+
+              <button
+                className="reset-filters-btn"
+                onClick={() => {
+                  setSearchTerm("");
+                  setStatusFilter("all");
+                  setColorFilter("all");
+                }}
+              >
+                Reset
+              </button>
+            </div>
+
+            <section className="tab-section">
+              <div className="schedule">
+                {days.map((day) => {
+                  const dayCourses = filteredCourses
+                    .filter((course) => course.day === day)
+                    .sort(
+                      (a, b) => toMinutes(a.startTime) - toMinutes(b.startTime),
+                    );
+
+                  return (
+                    <div className="day" key={day}>
+                      <h3>
+                        {day}
+                        <span className="day-count">
+                          {dayCourses.length}{" "}
+                          {dayCourses.length === 1 ? "class" : "classes"}
+                        </span>
+                      </h3>
+
+                      {dayCourses.length === 0 && (
+                        <p className="empty-day">No classes scheduled</p>
+                      )}
+
+                      {dayCourses.map((course) => (
+                        <div
+                          className={`course ${course.color} ${
+                            course.completed ? "completed-course" : ""
+                          }`}
+                          key={course.id}
+                          onClick={() => toggleExpand(course.id)}
+                        >
+                          <button
+                            className={
+                              course.favorite
+                                ? "favorite-btn active"
+                                : "favorite-btn"
+                            }
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleFavorite(course.id);
+                            }}
+                          >
+                            ★
+                          </button>
+                          <button
+                            className="delete-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteCourse(course.id);
+                            }}
+                          >
+                            ×
+                          </button>
+
+                          <button
+                            className="edit-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              editCourse(course);
+                            }}
+                          >
+                            Edit
+                          </button>
+
+                          <strong>{course.title}</strong>
+
+                          <span
+                            className={`priority ${course.priority || "low"}`}
+                          >
+                            {course.priority || "low"}
+                          </span>
+
+                          <span>
+                            {formatTime(course.startTime)} -{" "}
+                            {formatTime(course.endTime)}
+                          </span>
+
+                          {expandedCourse === course.id && (
+                            <>
+                              <small>{course.room}</small>
+
+                              <button
+                                className="complete-btn"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleComplete(course.id);
+                                }}
+                              >
+                                {course.completed
+                                  ? "Completed"
+                                  : "Mark Complete"}
+                              </button>
+
+                              {course.notes && (
+                                <p className="course-notes">{course.notes}</p>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          </>
         )}
+
         {activeTab === "courses" && (
           <section className="tab-section">
             <h2>All Courses</h2>
@@ -937,27 +1020,51 @@ function App() {
             </div>
           </section>
         )}
+
         {activeTab === "notes" && (
           <section className="tab-section">
-            <h2>Course Notes</h2>
+            <h2>Notes</h2>
 
-            <div className="course-list">
-              {courseList.filter((course) => course.notes).length === 0 ? (
+            <div className="note-form">
+              <select id="note-course">
+                <option value="">Select Course</option>
+
+                {courseList.map((course) => (
+                  <option key={course.id} value={course.title}>
+                    {course.title}
+                  </option>
+                ))}
+              </select>
+
+              <textarea
+                id="note-text"
+                placeholder="Write your notes..."
+                rows="4"
+              ></textarea>
+
+              <input type="file" id="note-file" />
+
+              <button onClick={addNote}>Add Note</button>
+            </div>
+
+            <div className="notes-list">
+              {notes.length === 0 ? (
                 <p className="empty-day">No notes added yet.</p>
               ) : (
-                courseList
-                  .filter((course) => course.notes)
-                  .map((course) => (
-                    <div
-                      className={`list-card ${course.color}`}
-                      key={course.id}
-                    >
-                      <div>
-                        <strong>{course.title}</strong>
-                        <p>{course.notes}</p>
-                      </div>
+                notes.map((note) => (
+                  <div className="note-card" key={note.id}>
+                    <div>
+                      <strong>{note.course}</strong>
+                      <span>{note.createdAt}</span>
                     </div>
-                  ))
+
+                    <p>{note.text}</p>
+
+                    {note.fileName && (
+                      <small>Attached file: {note.fileName}</small>
+                    )}
+                  </div>
+                ))
               )}
             </div>
           </section>
@@ -1022,16 +1129,51 @@ function App() {
                 ))}
               </select>
 
-              <button onClick={addAssignment}>Add Assignment</button>
+              <textarea
+                id="assignment-notes"
+                placeholder="Assignment notes..."
+                rows="3"
+              ></textarea>
+
+              <button onClick={addAssignment}>
+                {editingAssignmentId ? "Update Assignment" : "Add Assignment"}
+              </button>
+
+              {editingAssignmentId && (
+                <button
+                  className="cancel-edit-btn"
+                  onClick={cancelAssignmentEdit}
+                >
+                  Cancel
+                </button>
+              )}
             </div>
 
+            <div className="assignment-stats">
+              <div className="assignment-stat-card">
+                <span>Total</span>
+                <strong>{assignments.length}</strong>
+              </div>
+
+              <div className="assignment-stat-card">
+                <span>Completed</span>
+                <strong>{completedAssignments}</strong>
+              </div>
+
+              <div className="assignment-stat-card">
+                <span>Pending</span>
+                <strong>{pendingAssignments}</strong>
+              </div>
+            </div>
             <div className="assignment-list">
               {assignments.length === 0 ? (
                 <p className="empty-day">No assignments yet.</p>
               ) : (
-                assignments.map((assignment) => (
-                  <div
-                    className={`assignment-card
+                [...assignments]
+                  .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+                  .map((assignment) => (
+                    <div
+                      className={`assignment-card
     ${assignment.completed ? "completed-assignment" : ""}
     ${
       !assignment.completed && new Date(assignment.dueDate) < new Date()
@@ -1039,33 +1181,43 @@ function App() {
         : ""
     }
   `}
-                    key={assignment.id}
-                  >
-                    <div>
-                      <strong>{assignment.title}</strong>
+                      key={assignment.id}
+                    >
+                      <div>
+                        <strong>{assignment.title}</strong>
 
-                      <p>{assignment.course}</p>
+                        <p>{assignment.course}</p>
+                        {assignment.notes && (
+                          <p className="assignment-notes">{assignment.notes}</p>
+                        )}
+                      </div>
+
+                      <div className="assignment-right">
+                        <span>{assignment.dueDate}</span>
+
+                        <button
+                          className="assignment-edit-btn"
+                          onClick={() => editAssignment(assignment)}
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          className="assignment-complete-btn"
+                          onClick={() => toggleAssignment(assignment.id)}
+                        >
+                          {assignment.completed ? "Completed" : "Mark Done"}
+                        </button>
+
+                        <button
+                          className="assignment-delete-btn"
+                          onClick={() => deleteAssignment(assignment.id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
-
-                    <div className="assignment-right">
-                      <span>{assignment.dueDate}</span>
-
-                      <button
-                        className="assignment-complete-btn"
-                        onClick={() => toggleAssignment(assignment.id)}
-                      >
-                        {assignment.completed ? "Completed" : "Mark Done"}
-                      </button>
-
-                      <button
-                        className="assignment-delete-btn"
-                        onClick={() => deleteAssignment(assignment.id)}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                ))
+                  ))
               )}
             </div>
           </section>
@@ -1187,7 +1339,15 @@ function App() {
               </div>
 
               <p className="selected-date">
-                Selected date: <strong>{selectedDate.toDateString()}</strong>
+                Selected date:{" "}
+                <strong>
+                  {selectedDate.toLocaleDateString("en-US", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </strong>
               </p>
             </div>
           </section>

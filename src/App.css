@@ -11,6 +11,8 @@ body {
   font-family: Arial, sans-serif;
   background: #f6f7fb;
   color: #1f2340;
+  width: 100%;
+  min-height: 100vh;
 }
 
 button,
@@ -26,14 +28,15 @@ textarea {
 
 .app {
   min-height: 100vh;
+  width: 100%;
   display: flex;
   background: #f6f7fb;
 }
 
 .main {
   flex: 1;
-  width: calc(100% - 240px);
-  padding: 42px 56px;
+  width: 100%;
+  padding: 36px;
   overflow-x: hidden;
 }
 
@@ -42,8 +45,8 @@ textarea {
 ========================= */
 
 .sidebar {
-  width: 240px;
-  min-width: 240px;
+  width: 260px;
+  min-width: 260px;
   background: #ffffff;
   padding: 32px 24px;
   border-right: 1px solid #e6e8f0;
@@ -550,6 +553,19 @@ textarea {
 
 .reset-filters-btn {
   white-space: nowrap;
+}
+
+.assignment-notes {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #4b5563;
+  line-height: 1.4;
+}
+
+.assignment-edit-btn {
+  background: #6c63ff;
+  font-size: 12px;
+  padding: 8px 10px;
 }
 
 .form,
@@ -1065,6 +1081,92 @@ textarea:focus {
 }
 
 /* =========================
+   ASSIGNMENT STATS
+========================= */
+
+.assignment-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.assignment-stat-card {
+  background: #f8f9ff;
+  padding: 18px;
+  border-radius: 18px;
+}
+
+.assignment-stat-card span {
+  color: #727790;
+  font-size: 14px;
+}
+
+.assignment-stat-card strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 28px;
+  color: #111827;
+}
+
+/* =========================
+   NOTES
+========================= */
+
+.note-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.note-form select,
+.note-form textarea,
+.note-form input {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #dcdfe8;
+  background: white;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.note-card {
+  background: #f6f7fb;
+  padding: 18px;
+  border-radius: 18px;
+}
+
+.note-card div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.note-card span {
+  color: #727790;
+  font-size: 13px;
+}
+
+.note-card p {
+  margin: 0 0 10px;
+  color: #374151;
+  line-height: 1.5;
+}
+
+.note-card small {
+  color: #6c63ff;
+  font-weight: 700;
+}
+
+/* =========================
    DARK MODE
 ========================= */
 
@@ -1145,6 +1247,10 @@ textarea:focus {
 .app.dark .no-reminders {
   background: #14532d;
   color: #dcfce7;
+}
+
+.app.dark .assignment-notes {
+  color: #cbd5e1;
 }
 
 .app.dark .daily-load-item,
@@ -1241,6 +1347,31 @@ textarea:focus {
 .app.dark .reminder-card strong,
 .app.dark .reminder-card p {
   color: #111827;
+}
+
+.app.dark .assignment-stat-card {
+  background: #1f2937;
+}
+
+.app.dark .assignment-stat-card strong {
+  color: #f9fafb;
+}
+
+.app.dark .note-card {
+  background: #1f2937;
+}
+
+.app.dark .note-card p,
+.app.dark .note-card span {
+  color: #cbd5e1;
+}
+
+.app.dark .note-form select,
+.app.dark .note-form textarea,
+.app.dark .note-form input {
+  background: #1f2937;
+  color: #f9fafb;
+  border-color: #374151;
 }
 
 /* =========================
@@ -1405,6 +1536,10 @@ textarea:focus {
   .study-calendar .react-calendar__navigation button {
     min-width: 40px !important;
     height: 40px !important;
+  }
+
+  .assignment-stats {
+    grid-template-columns: 1fr;
   }
 }
 
