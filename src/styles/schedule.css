@@ -213,3 +213,32 @@
   margin-top: 14px;
   width: 100%;
 }
+
+.tab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.tab-header h2 {
+  margin: 0;
+}
+
+.tab-header p {
+  margin: 6px 0 0;
+  color: #64748b;
+}
+
+.course-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.course-actions button {
+  font-size: 12px;
+  padding: 8px 10px;
+}

@@ -98,6 +98,14 @@
   .day {
     min-height: auto;
   }
+
+  .form {
+    grid-template-columns: 1fr;
+  }
+
+  .form textarea {
+    grid-column: span 1;
+  }
 }
 
 @media (max-width: 480px) {

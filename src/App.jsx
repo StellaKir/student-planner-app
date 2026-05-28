@@ -12,17 +12,16 @@ import "./styles/calendar.css";
 import "./styles/responsive.css";
 import "./styles/darkmode.css";
 import { useState, useEffect } from "react";
-import Calendar from "react-calendar";
 import { Moon, Sun } from "lucide-react";
 import { courses } from "./data/courses";
 import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
-import DashboardCards from "./components/DashboardCards";
 import AssignmentsTab from "./components/AssignmentsTab";
 import NotesTab from "./components/NotesTab";
 import ExamsTab from "./components/ExamsTab";
 import CalendarTab from "./components/CalendarTab";
 import ScheduleTab from "./components/ScheduleTab";
+import CoursesTab from "./components/CoursesTab";
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const todayName = new Date().toLocaleDateString("en-US", {
@@ -612,163 +611,6 @@ function App() {
       <main className="main">
         <Header username={username} openAddModal={openAddModal} />
 
-        <DashboardCards
-          todayCourses={todayCourses}
-          pendingAssignments={pendingAssignments}
-          exams={exams}
-          upcomingExams={upcomingExams}
-          totalStudyHours={totalStudyHours}
-        />
-
-        <div className="dashboard-grid">
-          <div className="dashboard-panel today-panel">
-            <div className="panel-header">
-              <h2>Today's Schedule</h2>
-              <span>View full schedule →</span>
-            </div>
-
-            <div className="timeline-list">
-              {todayCourses.length === 0 ? (
-                <p className="empty-day">No classes for today 🎉</p>
-              ) : (
-                todayCourses.map((course) => (
-                  <div
-                    className={`timeline-card ${course.color}`}
-                    key={course.id}
-                  >
-                    <div className="timeline-time">
-                      {formatTime(course.startTime)}
-                      <br />
-                      {formatTime(course.endTime)}
-                    </div>
-
-                    <div className="timeline-info">
-                      <strong>{course.title}</strong>
-                      <p>{course.room}</p>
-                    </div>
-
-                    <span className="status">Upcoming</span>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-
-          <div className="dashboard-panel week-panel">
-            <div className="panel-header">
-              <h2>This Week Overview</h2>
-            </div>
-
-            <div className="week-grid">
-              {days.map((day) => {
-                const dayCourses = courseList.filter(
-                  (course) => course.day === day,
-                );
-
-                return (
-                  <div className="week-day" key={day}>
-                    <strong>{day.slice(0, 3)}</strong>
-
-                    {dayCourses.map((course) => (
-                      <div
-                        className={`mini-course ${course.color}`}
-                        key={course.id}
-                      >
-                        <span>{course.title}</span>
-                        <small>
-                          {formatTime(course.startTime)} -{" "}
-                          {formatTime(course.endTime)}
-                        </small>
-                      </div>
-                    ))}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="dashboard-panel progress-panel">
-            <h2>Study Progress</h2>
-
-            <div className="circle-progress">
-              <div>
-                <strong>{progress}%</strong>
-                <span>Weekly Goal</span>
-              </div>
-            </div>
-
-            <div className="progress-details">
-              <p>● {totalStudyHours}h Completed</p>
-              <p>● {pendingCourses} Pending</p>
-              <p>● {totalCourses} Courses</p>
-            </div>
-          </div>
-
-          <div className="dashboard-panel reminders-panel">
-            <div className="panel-header">
-              <h2>Reminders</h2>
-              <span>View all →</span>
-            </div>
-
-            {upcomingAssignments.length === 0 && upcomingExams.length === 0 ? (
-              <p className="empty-day">No upcoming reminders 🎉</p>
-            ) : (
-              <>
-                {upcomingAssignments.map((assignment) => (
-                  <div className="small-reminder" key={assignment.id}>
-                    <span>🔔</span>
-                    <div>
-                      <strong>{assignment.title}</strong>
-                      <p>
-                        {formatReminderText("assignment", assignment.dueDate)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-
-                {upcomingExams.map((exam) => (
-                  <div className="small-reminder" key={exam.id}>
-                    <span>🎓</span>
-                    <div>
-                      <strong>{exam.title}</strong>
-                      <p>{formatReminderText("exam", exam.date)}</p>
-                    </div>
-                  </div>
-                ))}
-              </>
-            )}
-          </div>
-
-          <div className="dashboard-panel deadlines-panel">
-            <h2>Upcoming Deadlines</h2>
-
-            {[...assignments]
-              .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
-              .slice(0, 4)
-              .map((assignment) => (
-                <div className="deadline-row" key={assignment.id}>
-                  <span>📌 {assignment.title}</span>
-                  <small>{assignment.dueDate}</small>
-                </div>
-              ))}
-          </div>
-
-          <div className="dashboard-panel quick-panel">
-            <h2>Quick Actions</h2>
-
-            <div className="quick-actions">
-              <button onClick={() => setActiveTab("assignments")}>
-                ＋ Add Assignment
-              </button>
-              <button onClick={() => setActiveTab("exams")}>＋ Add Exam</button>
-              <button onClick={() => setActiveTab("notes")}>＋ Add Note</button>
-              <button onClick={() => setActiveTab("calendar")}>
-                ＋ Calendar
-              </button>
-            </div>
-          </div>
-        </div>
-
         {activeTab === "schedule" && (
           <ScheduleTab
             days={days}
@@ -807,34 +649,14 @@ function App() {
         )}
 
         {activeTab === "courses" && (
-          <section className="tab-section">
-            <h2>All Courses</h2>
-
-            <div className="course-list">
-              {courseList.length === 0 ? (
-                <p className="empty-day">No courses added yet.</p>
-              ) : (
-                courseList.map((course) => (
-                  <div className={`list-card ${course.color}`} key={course.id}>
-                    <div>
-                      <strong>{course.title}</strong>
-                      <p>
-                        {course.day} · {formatTime(course.startTime)} -{" "}
-                        {formatTime(course.endTime)}
-                      </p>
-                      <small>{course.room}</small>
-                    </div>
-
-                    <span
-                      className={course.completed ? "status done" : "status"}
-                    >
-                      {course.completed ? "Completed" : "Pending"}
-                    </span>
-                  </div>
-                ))
-              )}
-            </div>
-          </section>
+          <CoursesTab
+            courseList={courseList}
+            formatTime={formatTime}
+            openAddModal={openAddModal}
+            editCourse={editCourse}
+            deleteCourse={deleteCourse}
+            toggleComplete={toggleComplete}
+          />
         )}
 
         {activeTab === "notes" && (

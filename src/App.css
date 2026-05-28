@@ -190,13 +190,96 @@ button:hover {
 }
 
 .form-modal {
-  width: min(720px, 100%);
+  width: min(760px, 95%);
   max-height: 90vh;
   overflow-y: auto;
+
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(18px);
+
+  padding: 34px;
+  border-radius: 32px;
+
+  border: 1px solid rgba(255, 255, 255, 0.4);
+
+  box-shadow:
+    0 25px 60px rgba(15, 23, 42, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+
+  animation: fadeIn 0.25s ease;
 }
 
-.modal h2,
+.form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+  margin-top: 26px;
+}
+
+.form input,
+.form select,
+.form textarea {
+  width: 100%;
+
+  padding: 15px 18px;
+
+  border-radius: 18px;
+  border: 1px solid #e2e8f0;
+
+  background: rgba(248, 250, 252, 0.9);
+
+  font-size: 14px;
+  color: #0f172a;
+
+  transition: all 0.2s ease;
+}
+
+.form input:focus,
+.form select:focus,
+.form textarea:focus {
+  outline: none;
+
+  border-color: #8b5cf6;
+
+  background: white;
+
+  box-shadow:
+    0 0 0 5px rgba(139, 92, 246, 0.12),
+    0 10px 25px rgba(139, 92, 246, 0.08);
+}
+
+.form textarea {
+  grid-column: span 2;
+  resize: vertical;
+  min-height: 120px;
+}
+
 .form-modal h2 {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.form button {
+  height: 52px;
+  border-radius: 18px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.form button:first-of-type {
+  background: linear-gradient(135deg, #6c63ff, #8b5cf6);
+
+  box-shadow: 0 14px 30px rgba(108, 99, 255, 0.25);
+}
+
+.cancel-edit-btn {
+  background: #eef2ff !important;
+  color: #4f46e5 !important;
+}
+
+.modal h2 {
   margin-top: 0;
   margin-bottom: 18px;
 }
@@ -468,9 +551,6 @@ button:hover {
   .search-box input,
   .search-box select,
   .search-box button,
-  .form input,
-  .form select,
-  .form textarea,
   .form button,
   .assignment-form input,
   .assignment-form select,
