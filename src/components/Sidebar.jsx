@@ -10,7 +10,10 @@ import {
 function Sidebar({ activeTab, setActiveTab }) {
   return (
     <aside className="sidebar">
-      <h2>StudyPlan</h2>
+      <h2 className="app-logo">
+        <span className="logo-main">Plan</span>
+        <span className="logo-accent">Oras</span>
+      </h2>
 
       <nav>
         <button

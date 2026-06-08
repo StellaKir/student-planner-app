@@ -2,38 +2,81 @@ import DashboardCards from "./DashboardCards";
 
 function ScheduleTab({
   days,
-  todayName,
   todayCourses,
-  upcomingCourse,
-  upcomingAssignments,
   upcomingExams,
   pendingAssignments,
   exams,
   totalStudyHours,
-  formatTime,
-  formatReminderText,
-  getReminderStatus,
-  getDaysUntil,
   completedCourses,
   pendingCourses,
   totalCourses,
   progress,
-  dailyStudyLoad,
-  searchTerm,
-  setSearchTerm,
-  statusFilter,
-  setStatusFilter,
-  colorFilter,
-  setColorFilter,
   filteredCourses,
   toMinutes,
-  toggleExpand,
-  expandedCourse,
-  toggleFavorite,
-  deleteCourse,
-  editCourse,
-  toggleComplete,
 }) {
+  const today = new Date();
+
+  const getWeekDates = () => {
+    const currentDay = today.getDay();
+    const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
+
+    return days.map((day, index) => {
+      const date = new Date(today);
+      date.setDate(today.getDate() + mondayOffset + index);
+
+      return {
+        day,
+        date: date.getDate(),
+        isToday: date.toDateString() === today.toDateString(),
+      };
+    });
+  };
+
+  const weekDates = getWeekDates();
+
+  const now = new Date();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+  const sortedTodayCourses = [...todayCourses].sort(
+    (a, b) => toMinutes(a.startTime) - toMinutes(b.startTime),
+  );
+
+  const getCourseStatus = (course) => {
+    const start = toMinutes(course.startTime);
+    const end = toMinutes(course.endTime);
+
+    if (currentMinutes > end) return "done";
+
+    if (currentMinutes >= start && currentMinutes <= end) {
+      return "active";
+    }
+
+    return "next";
+  };
+
+  const courseStats = Object.values(
+    filteredCourses.reduce((acc, course) => {
+      if (!acc[course.title]) {
+        acc[course.title] = {
+          title: course.title,
+          color: course.color,
+          count: 0,
+        };
+      }
+
+      acc[course.title].count += 1;
+
+      return acc;
+    }, {}),
+  )
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 4);
+
+  const maxCourseCount =
+    courseStats.length > 0
+      ? Math.max(...courseStats.map((course) => course.count))
+      : 1;
+
   return (
     <>
       <DashboardCards
@@ -44,291 +87,164 @@ function ScheduleTab({
         totalStudyHours={totalStudyHours}
       />
 
-      <div className="today-section">
-        <div className="today-header">
-          <div>
-            <h2>Today's Classes</h2>
-            <p>{todayName}</p>
+      <div className="dashboard-grid">
+        <section className="dashboard-panel today-schedule-panel">
+          <div className="panel-header">
+            <h2>Today's Schedule</h2>
+            <button>View full schedule →</button>
           </div>
 
-          {upcomingCourse && (
-            <div className="upcoming-badge">
-              Next: {upcomingCourse.title} at{" "}
-              {formatTime(upcomingCourse.startTime)}
-            </div>
-          )}
-        </div>
-
-        <div className="today-list">
-          {todayCourses.length === 0 ? (
-            <p className="empty-day">No classes for today 🎉</p>
-          ) : (
-            todayCourses.map((course) => (
-              <div className={`today-card ${course.color}`} key={course.id}>
-                <div>
-                  <strong>{course.title}</strong>
-
-                  <span className={`priority ${course.priority || "low"}`}>
-                    {course.priority || "low"}
-                  </span>
-
-                  <p>
-                    {formatTime(course.startTime)} -{" "}
-                    {formatTime(course.endTime)}
-                  </p>
-                </div>
-
-                <span>{course.room}</span>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-
-      <div className="reminders-section">
-        <div className="reminders-header">
-          <h2>Reminders</h2>
-          <span>
-            {upcomingAssignments.length + upcomingExams.length} upcoming
-          </span>
-        </div>
-
-        <div className="reminders-list">
-          {upcomingAssignments.length === 0 && upcomingExams.length === 0 ? (
-            <p className="empty-day">No upcoming reminders 🎉</p>
-          ) : (
-            <>
-              {upcomingAssignments.map((assignment) => (
-                <div
-                  className="reminder-card assignment-reminder"
-                  key={assignment.id}
-                >
-                  <div className="reminder-top">
-                    <strong>{assignment.title}</strong>
-
-                    <span
-                      className={`reminder-badge ${
-                        getDaysUntil(assignment.dueDate) === 0
-                          ? "badge-urgent"
-                          : getDaysUntil(assignment.dueDate) === 1
-                            ? "badge-tomorrow"
-                            : "badge-upcoming"
-                      }`}
-                    >
-                      {getReminderStatus(assignment.dueDate)}
-                    </span>
-                  </div>
-
-                  <p>
-                    Assignment · {assignment.course} ·{" "}
-                    {formatReminderText("assignment", assignment.dueDate)}
-                  </p>
-                </div>
-              ))}
-
-              {upcomingExams.map((exam) => (
-                <div
-                  className={`reminder-card exam-reminder ${
-                    getDaysUntil(exam.date) === 0
-                      ? "urgent-reminder"
-                      : getDaysUntil(exam.date) === 1
-                        ? "tomorrow-reminder"
-                        : ""
-                  }`}
-                  key={exam.id}
-                >
-                  <div className="reminder-top">
-                    <strong>{exam.title}</strong>
-
-                    <span
-                      className={`reminder-badge ${
-                        getDaysUntil(exam.date) === 0
-                          ? "badge-urgent"
-                          : getDaysUntil(exam.date) === 1
-                            ? "badge-tomorrow"
-                            : "badge-upcoming"
-                      }`}
-                    >
-                      {getReminderStatus(exam.date)}
-                    </span>
-                  </div>
-
-                  <p>
-                    Exam · {exam.course} ·{" "}
-                    {formatReminderText("exam", exam.date)}
-                  </p>
-                </div>
-              ))}
-            </>
-          )}
-        </div>
-      </div>
-
-      <div className="progress-section">
-        <div className="progress-header">
-          <span>Course Progress</span>
-          <strong>{progress}%</strong>
-        </div>
-
-        <div className="progress-bar">
-          <div
-            className="progress-fill"
-            style={{ width: `${progress}%` }}
-          ></div>
-        </div>
-      </div>
-
-      <div className="daily-load">
-        <h2>Daily Study Load</h2>
-
-        <div className="daily-load-list">
-          {dailyStudyLoad.map((item) => (
-            <div className="daily-load-item" key={item.day}>
-              <span>{item.day}</span>
-              <strong>{item.hours}h</strong>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="search-box">
-        <input
-          type="text"
-          placeholder="Search courses..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-        >
-          <option value="all">All</option>
-          <option value="completed">Completed</option>
-          <option value="pending">Pending</option>
-        </select>
-
-        <select
-          value={colorFilter}
-          onChange={(e) => setColorFilter(e.target.value)}
-        >
-          <option value="all">All Colors</option>
-          <option value="blue">Blue</option>
-          <option value="purple">Purple</option>
-          <option value="green">Green</option>
-          <option value="orange">Orange</option>
-        </select>
-
-        <button
-          className="reset-filters-btn"
-          onClick={() => {
-            setSearchTerm("");
-            setStatusFilter("all");
-            setColorFilter("all");
-          }}
-        >
-          Reset
-        </button>
-      </div>
-
-      <section className="tab-section">
-        <div className="schedule">
-          {days.map((day) => {
-            const dayCourses = filteredCourses
-              .filter((course) => course.day === day)
-              .sort((a, b) => toMinutes(a.startTime) - toMinutes(b.startTime));
-
-            return (
-              <div className="day" key={day}>
-                <h3>
-                  {day}
-                  <span className="day-count">
-                    {dayCourses.length}{" "}
-                    {dayCourses.length === 1 ? "class" : "classes"}
-                  </span>
-                </h3>
-
-                {dayCourses.length === 0 && (
-                  <p className="empty-day">No classes scheduled</p>
-                )}
-
-                {dayCourses.map((course) => (
+          <div className="today-timeline">
+            {todayCourses.length === 0 ? (
+              <p className="empty-day">No classes for today 🎉</p>
+            ) : (
+              sortedTodayCourses.slice(0, 3).map((course) => {
+                const status = getCourseStatus(course);
+                return (
                   <div
-                    className={`course ${course.color} ${
-                      course.completed ? "completed-course" : ""
-                    }`}
+                    className={`timeline-card ${course.color} ${
+                      status === "active" ? "in-progress" : ""
+                    } ${status === "next" ? "next-class" : ""}`}
                     key={course.id}
-                    onClick={() => toggleExpand(course.id)}
                   >
-                    <button
-                      className={
-                        course.favorite ? "favorite-btn active" : "favorite-btn"
-                      }
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleFavorite(course.id);
-                      }}
-                    >
-                      ★
-                    </button>
+                    <div className="timeline-time">
+                      <span>{course.startTime}</span>
+                      <span>{course.endTime}</span>
+                    </div>
 
-                    <button
-                      className="delete-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteCourse(course.id);
-                      }}
-                    >
-                      ×
-                    </button>
+                    <div className="timeline-content">
+                      <div className="timeline-title-row">
+                        <strong>{course.title}</strong>
 
-                    <button
-                      className="edit-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        editCourse(course);
-                      }}
-                    >
-                      Edit
-                    </button>
-
-                    <strong>{course.title}</strong>
-
-                    <span className={`priority ${course.priority || "low"}`}>
-                      {course.priority || "low"}
-                    </span>
-
-                    <span>
-                      {formatTime(course.startTime)} -{" "}
-                      {formatTime(course.endTime)}
-                    </span>
-
-                    {expandedCourse === course.id && (
-                      <>
-                        <small>{course.room}</small>
-
-                        <button
-                          className="complete-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleComplete(course.id);
-                          }}
-                        >
-                          {course.completed ? "Completed" : "Mark Complete"}
-                        </button>
-
-                        {course.notes && (
-                          <p className="course-notes">{course.notes}</p>
+                        {status === "done" && (
+                          <small className="status-pill done">Done</small>
                         )}
-                      </>
-                    )}
+
+                        {status === "active" && (
+                          <small className="status-pill active">
+                            In Progress
+                          </small>
+                        )}
+
+                        {status === "next" && (
+                          <small className="status-pill next">Next</small>
+                        )}
+                      </div>
+
+                      <p>{course.room}</p>
+                    </div>
                   </div>
-                ))}
+                );
+              })
+            )}
+          </div>
+        </section>
+
+        <section className="dashboard-panel study-progress-panel">
+          <h2>Study Progress</h2>
+
+          <div className="progress-circle" style={{ "--progress": progress }}>
+            <span>{progress}%</span>
+            <small>Completed</small>
+          </div>
+
+          <div className="progress-stats">
+            <div className="progress-stat">
+              <span>Completed</span>
+              <strong>{completedCourses}</strong>
+            </div>
+
+            <div className="progress-stat">
+              <span>Pending</span>
+              <strong>{pendingCourses}</strong>
+            </div>
+
+            <div className="progress-stat">
+              <span>Total</span>
+              <strong>{totalCourses}</strong>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div className="dashboard-bottom-grid">
+        <section className="dashboard-panel week-overview-panel">
+          <div className="panel-header">
+            <h2>This Week Overview</h2>
+          </div>
+
+          <div className="week-calendar">
+            <div className="week-days">
+              {weekDates.map((item) => (
+                <div
+                  className={`week-day ${item.isToday ? "active-day" : ""}`}
+                  key={item.day}
+                >
+                  <span>{item.day.slice(0, 3)}</span>
+                  <strong>{item.date}</strong>
+                </div>
+              ))}
+            </div>
+
+            <div className="week-grid">
+              {days.map((day) => {
+                const dayCourses = filteredCourses.filter(
+                  (course) => course.day === day,
+                );
+
+                return (
+                  <div className="week-column" key={day}>
+                    {dayCourses.slice(0, 3).map((course) => (
+                      <div
+                        className={`mini-course ${course.color}`}
+                        key={course.id}
+                      >
+                        <strong>{course.title}</strong>
+                        <span>
+                          {course.startTime} - {course.endTime}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section className="dashboard-panel top-courses-panel">
+          <div className="panel-header">
+            <h2>Top Courses</h2>
+            <span>{filteredCourses.length} courses</span>
+          </div>
+
+          <div className="top-courses-list">
+            {courseStats.map((course) => (
+              <div className="top-course" key={course.id}>
+                <div className={`course-dot ${course.color}`}></div>
+
+                <div className="top-course-info">
+                  <div className="top-course-title">
+                    <span>{course.title}</span>
+                    <small>
+                      {course.count} {course.count === 1 ? "class" : "classes"}
+                    </small>
+                  </div>
+
+                  <div className="top-course-bar">
+                    <div
+                      className={`top-course-fill ${course.color}`}
+                      style={{
+                        width: `${(course.count / maxCourseCount) * 100}%`,
+                      }}
+                    ></div>
+                  </div>
+                </div>
               </div>
-            );
-          })}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      </div>
     </>
   );
 }

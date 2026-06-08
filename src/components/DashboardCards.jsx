@@ -5,47 +5,50 @@ function DashboardCards({
   upcomingExams,
   totalStudyHours,
 }) {
+  const cards = [
+    {
+      title: "Today's Classes",
+      value: todayCourses.length,
+      text: "View schedule →",
+      icon: "📅",
+      color: "purple",
+    },
+    {
+      title: "Assignments",
+      value: pendingAssignments,
+      text: `${pendingAssignments} pending`,
+      icon: "✅",
+      color: "green",
+    },
+    {
+      title: "Exams",
+      value: exams.length,
+      text: `${upcomingExams.length} upcoming`,
+      icon: "🎓",
+      color: "orange",
+    },
+    {
+      title: "Study Time",
+      value: `${totalStudyHours}h`,
+      text: "This week",
+      icon: "🕒",
+      color: "blue",
+    },
+  ];
+
   return (
     <div className="dashboard-cards">
-      <div className="dashboard-card purple-card">
-        <div className="card-icon">📅</div>
+      {cards.map((card) => (
+        <div className={`dashboard-card ${card.color}-card`} key={card.title}>
+          <div className="card-icon">{card.icon}</div>
 
-        <div>
-          <span>Today's Classes</span>
-          <strong>{todayCourses.length}</strong>
-          <p>View schedule →</p>
+          <div className="card-content">
+            <span>{card.title}</span>
+            <strong>{card.value}</strong>
+            <p>{card.text}</p>
+          </div>
         </div>
-      </div>
-
-      <div className="dashboard-card green-card">
-        <div className="card-icon">✅</div>
-
-        <div>
-          <span>Assignments</span>
-          <strong>{pendingAssignments}</strong>
-          <p>{pendingAssignments} pending</p>
-        </div>
-      </div>
-
-      <div className="dashboard-card orange-card">
-        <div className="card-icon">🎓</div>
-
-        <div>
-          <span>Exams</span>
-          <strong>{exams.length}</strong>
-          <p>{upcomingExams.length} upcoming</p>
-        </div>
-      </div>
-
-      <div className="dashboard-card blue-card">
-        <div className="card-icon">🕒</div>
-
-        <div>
-          <span>Study Time</span>
-          <strong>{totalStudyHours}h</strong>
-          <p>This week</p>
-        </div>
-      </div>
+      ))}
     </div>
   );
 }

@@ -5,9 +5,19 @@ function AssignmentsTab({
   toggleAssignmentComplete,
   deleteAssignment,
   editAssignment,
+  openAssignmentModal,
 }) {
   return (
     <section className="tab-section">
+      <div className="tab-header">
+        <div>
+          <h2>Assignments</h2>
+          <p>Manage your assignments and deadlines.</p>
+        </div>
+
+        <button onClick={openAssignmentModal}>+ Add Assignment</button>
+      </div>
+
       <h2>Assignments</h2>
 
       <div className="assignment-stats">

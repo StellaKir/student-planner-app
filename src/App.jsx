@@ -13,7 +13,6 @@ import "./styles/responsive.css";
 import "./styles/darkmode.css";
 import { useState, useEffect } from "react";
 import { Moon, Sun } from "lucide-react";
-import { courses } from "./data/courses";
 import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import AssignmentsTab from "./components/AssignmentsTab";
@@ -31,7 +30,12 @@ const todayName = new Date().toLocaleDateString("en-US", {
 function App() {
   const [courseList, setCourseList] = useState(() => {
     const saved = localStorage.getItem("courses");
-    return saved ? JSON.parse(saved) : courses;
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [savedCourses, setSavedCourses] = useState(() => {
+    const saved = localStorage.getItem("savedCourses");
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [editingId, setEditingId] = useState(null);
@@ -42,6 +46,7 @@ function App() {
   const [activeTab, setActiveTab] = useState("schedule");
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [editingAssignmentId, setEditingAssignmentId] = useState(null);
+  const [showAssignmentModal, setShowAssignmentModal] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -77,6 +82,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem("courses", JSON.stringify(courseList));
   }, [courseList]);
+
+  useEffect(() => {
+    localStorage.setItem("savedCourses", JSON.stringify(savedCourses));
+  }, [savedCourses]);
 
   useEffect(() => {
     localStorage.setItem("assignments", JSON.stringify(assignments));
@@ -133,17 +142,23 @@ function App() {
   }
 
   function addCourse() {
-    const title = document.getElementById("title").value.trim();
+    const title = document.getElementById("title").value;
     const day = document.getElementById("day").value;
     const start = document.getElementById("start").value;
     const end = document.getElementById("end").value;
     const room = document.getElementById("room").value.trim();
-    const notes = document.getElementById("notes").value.trim();
-    const priority = document.getElementById("priority").value;
-    const color = document.getElementById("color").value;
+
+    const selectedCourse = savedCourses.find(
+      (course) => course.title === title,
+    );
 
     if (!title || !start || !end || !room) {
       alert("Please fill in all fields.");
+      return;
+    }
+
+    if (!selectedCourse) {
+      alert("Please select a saved course.");
       return;
     }
 
@@ -165,7 +180,7 @@ function App() {
     });
 
     if (conflict) {
-      alert("Time conflict! You already have a course at that time.");
+      alert("Time conflict! You already have a class at that time.");
       return;
     }
 
@@ -173,14 +188,15 @@ function App() {
 
     const newCourse = {
       id: editingId || Date.now(),
-      title,
+      courseId: selectedCourse.id,
+      title: selectedCourse.title,
+      teacher: selectedCourse.teacher,
+      notes: selectedCourse.notes,
+      color: selectedCourse.color,
       day,
       startTime: start,
       endTime: end,
       room,
-      notes,
-      color,
-      priority,
       completed: existingCourse ? existingCourse.completed : false,
       favorite: existingCourse ? existingCourse.favorite : false,
     };
@@ -241,6 +257,10 @@ function App() {
     );
 
     setCourseList(updatedCourses);
+  }
+
+  function deleteSavedCourse(id) {
+    setSavedCourses(savedCourses.filter((course) => course.id !== id));
   }
 
   function toggleFavorite(id) {
@@ -461,6 +481,16 @@ function App() {
     document.getElementById("assignment-notes").value = "";
   }
 
+  function openAssignmentModal() {
+    setEditingAssignmentId(null);
+    setShowAssignmentModal(true);
+  }
+
+  function closeAssignmentModal() {
+    setEditingAssignmentId(null);
+    setShowAssignmentModal(false);
+  }
+
   function addNote() {
     const course = document.getElementById("note-course").value;
     const text = document.getElementById("note-text").value.trim();
@@ -527,6 +557,8 @@ function App() {
     document.getElementById("assignment-title").value = "";
     document.getElementById("assignment-date").value = "";
     document.getElementById("assignment-notes").value = "";
+
+    setShowAssignmentModal(false);
   }
 
   function tileClassName({ date, view }) {
@@ -565,6 +597,29 @@ function App() {
     );
   }
 
+  function addSavedCourse() {
+    const title = document.getElementById("title").value.trim();
+    const teacher = document.getElementById("teacher").value.trim();
+    const notes = document.getElementById("notes").value.trim();
+    const color = document.getElementById("color").value;
+
+    if (!title) {
+      alert("Please add a course name.");
+      return;
+    }
+
+    const newCourse = {
+      id: Date.now(),
+      title,
+      teacher,
+      notes,
+      color,
+    };
+
+    setSavedCourses([...savedCourses, newCourse]);
+    setShowFormModal(false);
+  }
+
   function toggleExam(id) {
     const updatedExams = exams.map((exam) =>
       exam.id === id ? { ...exam, completed: !exam.completed } : exam,
@@ -583,7 +638,10 @@ function App() {
     return (
       <div className="login-page">
         <div className="login-card">
-          <h1>Planoras</h1>
+          <h1 className="logo-login">
+            <span className="logo-main">Plan</span>
+            <span className="logo-accent">Oras</span>
+          </h1>
 
           <p>Sign in to manage your university schedule</p>
 
@@ -614,48 +672,26 @@ function App() {
         {activeTab === "schedule" && (
           <ScheduleTab
             days={days}
-            todayName={todayName}
             todayCourses={todayCourses}
-            upcomingCourse={upcomingCourse}
-            upcomingAssignments={upcomingAssignments}
             upcomingExams={upcomingExams}
             pendingAssignments={pendingAssignments}
             exams={exams}
             totalStudyHours={totalStudyHours}
-            formatTime={formatTime}
-            formatReminderText={formatReminderText}
-            getReminderStatus={getReminderStatus}
-            getDaysUntil={getDaysUntil}
             completedCourses={completedCourses}
             pendingCourses={pendingCourses}
             totalCourses={totalCourses}
             progress={progress}
-            dailyStudyLoad={dailyStudyLoad}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            statusFilter={statusFilter}
-            setStatusFilter={setStatusFilter}
-            colorFilter={colorFilter}
-            setColorFilter={setColorFilter}
             filteredCourses={filteredCourses}
             toMinutes={toMinutes}
             toggleExpand={toggleExpand}
-            expandedCourse={expandedCourse}
-            toggleFavorite={toggleFavorite}
-            deleteCourse={deleteCourse}
-            editCourse={editCourse}
-            toggleComplete={toggleComplete}
           />
         )}
 
         {activeTab === "courses" && (
           <CoursesTab
-            courseList={courseList}
-            formatTime={formatTime}
-            openAddModal={openAddModal}
-            editCourse={editCourse}
-            deleteCourse={deleteCourse}
-            toggleComplete={toggleComplete}
+            savedCourses={savedCourses}
+            openCourseModal={openAddModal}
+            deleteSavedCourse={deleteSavedCourse}
           />
         )}
 
@@ -707,6 +743,7 @@ function App() {
             toggleAssignmentComplete={toggleAssignment}
             deleteAssignment={deleteAssignment}
             editAssignment={editAssignment}
+            openAssignmentModal={openAssignmentModal}
           />
         )}
 
@@ -730,76 +767,153 @@ function App() {
         )}
       </main>
 
-      {showFormModal && (
+      {showAssignmentModal && (
         <div className="modal-overlay">
           <div className="form-modal">
-            <h2>{editingId ? "Edit Course" : "Add New Course"}</h2>
+            <h2>
+              {editingAssignmentId ? "Edit Assignment" : "Add Assignment"}
+            </h2>
 
             <div className="form">
-              <input placeholder="Course name" id="title" />
+              <input
+                type="text"
+                placeholder="Assignment title"
+                id="assignment-title"
+              />
 
-              <select id="day">
-                <option>Monday</option>
-                <option>Tuesday</option>
-                <option>Wednesday</option>
-                <option>Thursday</option>
-                <option>Friday</option>
+              <input type="date" id="assignment-date" />
+
+              <select id="assignment-course">
+                <option value="">Select Course</option>
+
+                {courseList.map((course) => (
+                  <option key={course.id} value={course.title}>
+                    {course.title}
+                  </option>
+                ))}
               </select>
 
-              <select id="start">
-                <option value="">Start time</option>
-                <option value="08:00">8:00 AM</option>
-                <option value="09:00">9:00 AM</option>
-                <option value="10:00">10:00 AM</option>
-                <option value="11:00">11:00 AM</option>
-                <option value="12:00">12:00 PM</option>
-                <option value="13:00">1:00 PM</option>
-                <option value="14:00">2:00 PM</option>
-                <option value="15:00">3:00 PM</option>
-                <option value="16:00">4:00 PM</option>
-                <option value="17:00">5:00 PM</option>
-                <option value="18:00">6:00 PM</option>
-                <option value="19:00">7:00 PM</option>
-                <option value="20:00">8:00 PM</option>
-              </select>
-
-              <select id="end">
-                <option value="">End time</option>
-                <option value="08:00">8:00 AM</option>
-                <option value="09:00">9:00 AM</option>
-                <option value="10:00">10:00 AM</option>
-                <option value="11:00">11:00 AM</option>
-                <option value="12:00">12:00 PM</option>
-                <option value="13:00">1:00 PM</option>
-                <option value="14:00">2:00 PM</option>
-                <option value="15:00">3:00 PM</option>
-                <option value="16:00">4:00 PM</option>
-                <option value="17:00">5:00 PM</option>
-                <option value="18:00">6:00 PM</option>
-                <option value="19:00">7:00 PM</option>
-                <option value="20:00">8:00 PM</option>
-              </select>
-
-              <input placeholder="Room" id="room" />
-
-              <textarea placeholder="Notes..." id="notes" rows="3"></textarea>
-
-              <select id="priority">
+              <select id="assignment-priority">
                 <option value="low">Low Priority</option>
                 <option value="medium">Medium Priority</option>
                 <option value="high">High Priority</option>
               </select>
 
-              <select id="color">
-                <option value="blue">Blue</option>
-                <option value="purple">Purple</option>
-                <option value="green">Green</option>
-                <option value="orange">Orange</option>
-              </select>
+              <textarea
+                id="assignment-notes"
+                placeholder="Assignment notes..."
+                rows="3"
+              ></textarea>
 
-              <button onClick={addCourse}>
-                {editingId ? "Update Course" : "Add Course"}
+              <button onClick={addAssignment}>
+                {editingAssignmentId ? "Update Assignment" : "Add Assignment"}
               </button>
+
+              <button
+                className="cancel-edit-btn"
+                onClick={closeAssignmentModal}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showFormModal && (
+        <div className="modal-overlay">
+          <div className="form-modal">
+            <h2>
+              {activeTab === "courses"
+                ? "Add Course"
+                : editingId
+                  ? "Edit Class"
+                  : "Add Class"}
+            </h2>
+
+            <div className="form">
+              {activeTab === "courses" ? (
+                <>
+                  <input placeholder="Course name" id="title" />
+
+                  <input placeholder="Teacher name" id="teacher" />
+
+                  <textarea
+                    placeholder="Notes..."
+                    id="notes"
+                    rows="3"
+                  ></textarea>
+
+                  <select id="color">
+                    <option value="blue">Blue</option>
+                    <option value="purple">Purple</option>
+                    <option value="green">Green</option>
+                    <option value="orange">Orange</option>
+                  </select>
+
+                  <button onClick={addSavedCourse}>Add Course</button>
+                </>
+              ) : (
+                <>
+                  <select id="title">
+                    <option value="">Select course</option>
+
+                    {savedCourses.map((course) => (
+                      <option key={course.id} value={course.title}>
+                        {course.title}
+                      </option>
+                    ))}
+                  </select>
+
+                  <select id="day">
+                    <option>Monday</option>
+                    <option>Tuesday</option>
+                    <option>Wednesday</option>
+                    <option>Thursday</option>
+                    <option>Friday</option>
+                  </select>
+
+                  <select id="start">
+                    <option value="">Start time</option>
+                    <option value="08:00">8:00 AM</option>
+                    <option value="09:00">9:00 AM</option>
+                    <option value="10:00">10:00 AM</option>
+                    <option value="11:00">11:00 AM</option>
+                    <option value="12:00">12:00 PM</option>
+                    <option value="13:00">1:00 PM</option>
+                    <option value="14:00">2:00 PM</option>
+                    <option value="15:00">3:00 PM</option>
+                    <option value="16:00">4:00 PM</option>
+                    <option value="17:00">5:00 PM</option>
+                    <option value="18:00">6:00 PM</option>
+                    <option value="19:00">7:00 PM</option>
+                    <option value="20:00">8:00 PM</option>
+                  </select>
+
+                  <select id="end">
+                    <option value="">End time</option>
+                    <option value="08:00">8:00 AM</option>
+                    <option value="09:00">9:00 AM</option>
+                    <option value="10:00">10:00 AM</option>
+                    <option value="11:00">11:00 AM</option>
+                    <option value="12:00">12:00 PM</option>
+                    <option value="13:00">1:00 PM</option>
+                    <option value="14:00">2:00 PM</option>
+                    <option value="15:00">3:00 PM</option>
+                    <option value="16:00">4:00 PM</option>
+                    <option value="17:00">5:00 PM</option>
+                    <option value="18:00">6:00 PM</option>
+                    <option value="19:00">7:00 PM</option>
+                    <option value="20:00">8:00 PM</option>
+                  </select>
+
+                  <input placeholder="Room" id="room" />
+
+                  <button onClick={addCourse}>
+                    {editingId ? "Update Class" : "Add Class"}
+                  </button>
+                </>
+              )}
 
               <button className="cancel-edit-btn" onClick={cancelEdit}>
                 Cancel
