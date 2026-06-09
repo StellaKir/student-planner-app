@@ -28,15 +28,119 @@ const todayName = new Date().toLocaleDateString("en-US", {
   weekday: "long",
 });
 
+const defaultSavedCourses = [
+  {
+    id: 1,
+    title: "Web Development",
+    teacher: "Dr. Smith",
+    notes: "HTML, CSS, JavaScript",
+    color: "blue",
+  },
+  {
+    id: 2,
+    title: "Databases",
+    teacher: "Prof. Johnson",
+    notes: "SQL and ER diagrams",
+    color: "green",
+  },
+  {
+    id: 3,
+    title: "Software Engineering",
+    teacher: "Dr. Brown",
+    notes: "Project management and Agile",
+    color: "purple",
+  },
+];
+
+const defaultSchedule = [
+  {
+    id: 101,
+    courseId: 1,
+    title: "Web Development",
+    teacher: "Dr. Smith",
+    date: "2026-06-10",
+    day: "Wednesday",
+    startTime: "10:00",
+    endTime: "12:00",
+    room: "Lab A",
+    status: "pending",
+    color: "blue",
+  },
+  {
+    id: 102,
+    courseId: 2,
+    title: "Databases",
+    teacher: "Prof. Johnson",
+    date: "2026-06-11",
+    day: "Thursday",
+    startTime: "13:00",
+    endTime: "15:00",
+    room: "Room B12",
+    status: "completed",
+    color: "green",
+  },
+];
+
+const defaultAssignments = [
+  {
+    id: 201,
+    title: "Portfolio Landing Page",
+    course: "Web Development",
+    dueDate: "2026-06-15",
+    notes: "Finish responsive version",
+    completed: false,
+  },
+  {
+    id: 202,
+    title: "Database Design",
+    course: "Databases",
+    dueDate: "2026-06-18",
+    notes: "Create ER diagram",
+    completed: true,
+  },
+];
+
+const defaultExams = [
+  {
+    id: 301,
+    title: "Midterm Exam",
+    course: "Web Development",
+    date: "2026-06-25",
+  },
+  {
+    id: 302,
+    title: "Final Database Exam",
+    course: "Databases",
+    date: "2026-06-30",
+  },
+];
+
+const defaultNotes = [
+  {
+    id: 401,
+    course: "Web Development",
+    text: "React components, props and state.",
+    files: [],
+    createdAt: "Jun 8, 2026",
+  },
+  {
+    id: 402,
+    course: "Databases",
+    text: "Normalization up to 3NF.",
+    files: [],
+    createdAt: "Jun 9, 2026",
+  },
+];
+
 function App() {
   const [courseList, setCourseList] = useState(() => {
     const saved = localStorage.getItem("courses");
-    return saved ? JSON.parse(saved) : [];
+    return saved ? JSON.parse(saved) : defaultSchedule;
   });
 
   const [savedCourses, setSavedCourses] = useState(() => {
     const saved = localStorage.getItem("savedCourses");
-    return saved ? JSON.parse(saved) : [];
+    return saved ? JSON.parse(saved) : savedCourses;
   });
 
   const [editingSavedCourseId, setEditingSavedCourseId] = useState(null);
@@ -64,15 +168,15 @@ function App() {
 
   const [assignments, setAssignments] = useState(() => {
     const saved = localStorage.getItem("assignments");
-    return saved ? JSON.parse(saved) : [];
+    return saved ? JSON.parse(saved) : assignments;
   });
   const [exams, setExams] = useState(() => {
     const saved = localStorage.getItem("exams");
-    return saved ? JSON.parse(saved) : [];
+    return saved ? JSON.parse(saved) : exams;
   });
   const [notes, setNotes] = useState(() => {
     const saved = localStorage.getItem("notes");
-    return saved ? JSON.parse(saved) : [];
+    return saved ? JSON.parse(saved) : defaultNotes;
   });
 
   const [showNoteForm, setShowNoteForm] = useState(false);
