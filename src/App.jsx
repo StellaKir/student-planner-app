@@ -140,9 +140,8 @@ function App() {
 
   const [savedCourses, setSavedCourses] = useState(() => {
     const saved = localStorage.getItem("savedCourses");
-    return saved ? JSON.parse(saved) : savedCourses;
+    return saved ? JSON.parse(saved) : defaultSavedCourses;
   });
-
   const [editingSavedCourseId, setEditingSavedCourseId] = useState(null);
 
   const [editingId, setEditingId] = useState(null);
@@ -168,11 +167,11 @@ function App() {
 
   const [assignments, setAssignments] = useState(() => {
     const saved = localStorage.getItem("assignments");
-    return saved ? JSON.parse(saved) : assignments;
+    return saved ? JSON.parse(saved) : defaultAssignments;
   });
   const [exams, setExams] = useState(() => {
     const saved = localStorage.getItem("exams");
-    return saved ? JSON.parse(saved) : exams;
+    return saved ? JSON.parse(saved) : defaultExams;
   });
   const [notes, setNotes] = useState(() => {
     const saved = localStorage.getItem("notes");
