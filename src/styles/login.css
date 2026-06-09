@@ -1,0 +1,10 @@
+.demo-note {
+  background: #eef6ff;
+  color: #2563eb !important;
+  border: 1px solid #bfdbfe;
+  padding: 10px 12px;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+}

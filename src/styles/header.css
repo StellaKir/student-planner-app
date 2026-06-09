@@ -25,7 +25,15 @@
 
 .header-actions {
   display: flex;
-  gap: 12px;
   align-items: center;
-  flex-wrap: wrap;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.header-actions .theme-toggle {
+  order: 2;
+}
+
+.header-actions button:not(.theme-toggle) {
+  order: 1;
 }

@@ -218,8 +218,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 20px;
+  flex-wrap: wrap;
 }
 
 .tab-header h2 {

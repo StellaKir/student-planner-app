@@ -1,4 +1,6 @@
-function Header({ username, openAddModal, activeTab }) {
+import { Moon, Sun } from "lucide-react";
+
+function Header({ username, openAddModal, activeTab, darkMode, setDarkMode }) {
   return (
     <header className="header">
       <div>
@@ -7,6 +9,10 @@ function Header({ username, openAddModal, activeTab }) {
       </div>
 
       <div className="header-actions">
+        <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
+          {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+        </button>
+
         {activeTab === "schedule" && (
           <button onClick={openAddModal}>+ Add Class to Schedule</button>
         )}

@@ -30,16 +30,6 @@ function CoursesTab({
               key={course.id}
               onClick={() => setSelectedCourse(course)}
             >
-              <button
-                className="course-box-delete"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setCourseToDelete(course);
-                }}
-              >
-                ×
-              </button>
-
               <div className="course-box-icon">
                 {course.title.charAt(0).toUpperCase()}
               </div>

@@ -118,14 +118,6 @@
   border-radius: 50%;
 }
 
-.assignment-dot {
-  background: #3b82f6;
-}
-
-.exam-dot {
-  background: #f97316;
-}
-
 /* side panel */
 
 .calendar-side-panel {
@@ -215,13 +207,6 @@
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-}
-
-.study-calendar .react-calendar__year-view__months__month:hover,
-.study-calendar .react-calendar__decade-view__years__year:hover,
-.study-calendar .react-calendar__century-view__decades__decade:hover {
-  background: #dbeafe !important;
-  color: #1d4ed8 !important;
 }
 
 .study-calendar .react-calendar__year-view__months__month:hover,

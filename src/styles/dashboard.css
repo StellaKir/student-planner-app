@@ -111,134 +111,6 @@
 }
 
 /* =========================
-   TODAY / REMINDERS
-========================= */
-
-.today-section,
-.reminders-section,
-.progress-section,
-.daily-load {
-  background: white;
-  border-radius: 24px;
-  padding: 24px;
-  margin-bottom: 24px;
-  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.06);
-}
-
-.today-header,
-.reminders-header,
-.progress-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 18px;
-}
-
-.today-header h2,
-.reminders-header h2,
-.daily-load h2 {
-  margin: 0;
-}
-
-.today-header p {
-  margin-top: 6px;
-  color: #0f172a;
-}
-
-.upcoming-badge {
-  background: #eef2ff;
-  color: #6c63ff;
-  padding: 10px 14px;
-  border-radius: 999px;
-  font-weight: 700;
-  font-size: 13px;
-}
-
-.today-list,
-.reminders-list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.today-card,
-.reminder-card {
-  padding: 18px;
-  border-radius: 18px;
-}
-
-.reminder-top {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-.reminder-badge {
-  padding: 6px 10px;
-  border-radius: 999px;
-  color: white;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.badge-urgent {
-  background: #dc2626;
-}
-
-.badge-tomorrow {
-  background: #f97316;
-}
-
-.badge-upcoming {
-  background: #6366f1;
-}
-
-/* =========================
-   PROGRESS
-========================= */
-
-.progress-bar {
-  width: 100%;
-  height: 12px;
-  background: #e5e7eb;
-  border-radius: 999px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #6c63ff, #8b5cf6);
-}
-
-/* =========================
-   DAILY LOAD
-========================= */
-
-.daily-load-list {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 14px;
-}
-
-.daily-load-item {
-  background: #f8fafc;
-  border-radius: 16px;
-  padding: 16px;
-  text-align: center;
-}
-
-.daily-load-item span {
-  display: block;
-  color: #0f172a;
-  margin-bottom: 8px;
-}
-
-.daily-load-item strong {
-  font-size: 20px;
-}
-
-/* =========================
    NEW DASHBOARD LAYOUT
 ========================= */
 
@@ -678,30 +550,6 @@
 
 /* COURSE COLORS INSIDE DASHBOARD */
 
-.course.blue,
-.today-card.blue {
-  background: #dbeafe;
-  color: #1d4ed8;
-}
-
-.course.green,
-.today-card.green {
-  background: #dcfce7;
-  color: #047857;
-}
-
-.course.orange,
-.today-card.orange {
-  background: #fef3c7;
-  color: #b45309;
-}
-
-.course.purple,
-.today-card.purple {
-  background: #ede9fe;
-  color: #6d28d9;
-}
-
 .dashboard-bottom-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -864,33 +712,6 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-}
-
-.status-pill {
-  flex-shrink: 0;
-  padding: 4px 8px;
-  border-radius: 999px;
-  font-size: 9px;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.status-pill.active {
-  background: #dcfce7;
-  color: #047857;
-}
-
-.status-pill.next {
-  background: #dbeafe;
-  color: #1d4ed8;
-}
-
-.timeline-card.in-progress .timeline-content {
-  outline: 2px solid #86efac;
-}
-
-.timeline-card.next-class .timeline-content {
-  outline: 2px solid #93c5fd;
 }
 
 .status-pill {

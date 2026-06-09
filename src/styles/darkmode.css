@@ -4,61 +4,132 @@
 
 .app.dark {
   background: #0f172a;
-  color: #e5e7eb;
+  color: #f8fafc;
+}
+
+/* layout */
+
+.app.dark .main {
+  background: #0f172a;
+}
+
+.app.dark .sidebar {
+  background: #111827;
+  border-right-color: #1e293b;
+}
+
+.app.dark .header,
+.app.dark .tab-section,
+.app.dark .dashboard-panel,
+.app.dark .calendar-side-panel,
+.app.dark .study-calendar,
+.app.dark .form-modal,
+.app.dark .modal,
+.app.dark .login-card {
+  background: #111827 !important;
+  color: #f8fafc !important;
+  border-color: #1e293b !important;
+}
+
+/* text */
+
+.app.dark h1,
+.app.dark h2,
+.app.dark h3,
+.app.dark strong,
+.app.dark .header h1,
+.app.dark .dashboard-panel h2,
+.app.dark .panel-header h2,
+.app.dark .course-box h3,
+.app.dark .note-box h3,
+.app.dark .assignment-box h3,
+.app.dark .exam-card strong,
+.app.dark .selected-date,
+.app.dark .selected-date strong {
+  color: #f8fafc !important;
+}
+
+.app.dark p,
+.app.dark span,
+.app.dark small,
+.app.dark label,
+.app.dark .header p,
+.app.dark .dashboard-panel p,
+.app.dark .dashboard-panel span,
+.app.dark .dashboard-panel small,
+.app.dark .course-box p,
+.app.dark .note-box p,
+.app.dark .assignment-box p,
+.app.dark .exam-card p,
+.app.dark .exam-card small,
+.app.dark .calendar-events p,
+.app.dark .empty-day {
+  color: #cbd5e1 !important;
 }
 
 /* sidebar */
 
-.app.dark .sidebar {
-  background: #111827;
-  border-right-color: #1f2937;
+.app.dark .sidebar h2,
+.app.dark .logo-main {
+  color: #f8fafc !important;
 }
 
-.app.dark .sidebar h2 {
-  color: #a78bfa;
+.app.dark .logo-accent {
+  color: #60a5fa !important;
 }
 
 .app.dark .nav-link {
   color: #cbd5e1;
 }
 
-.app.dark .nav-link:hover {
+.app.dark .nav-link:hover,
+.app.dark .nav-link.active {
   background: #1e293b;
+  color: #f8fafc;
 }
 
-/* header */
-
-.app.dark .header h1 {
-  color: #f9fafb;
-}
-
-.app.dark .header p {
-  color: #94a3b8;
-}
-
-/* sections */
-
-.app.dark .tab-section,
-.app.dark .today-section,
-.app.dark .reminders-section,
-.app.dark .progress-section,
-.app.dark .daily-load,
-.app.dark .calendar-wrapper {
-  background: #111827;
-  color: #e5e7eb;
-}
-
-/* cards */
+/* dashboard cards */
 
 .app.dark .dashboard-card,
-.app.dark .assignment-card,
+.app.dark .course-box,
+.app.dark .note-box,
+.app.dark .assignment-box,
 .app.dark .exam-card,
-.app.dark .note-card,
-.app.dark .daily-load-item,
 .app.dark .assignment-stat-card,
-.app.dark .day {
-  background: #1f2937;
-  color: #f9fafb;
+.app.dark .progress-stat,
+.app.dark .calendar-class-card,
+.app.dark .calendar-events .assignment-card,
+.app.dark .calendar-events .exam-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+.app.dark .timeline-content,
+.app.dark .mini-course,
+.app.dark .top-course-bar {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+.app.dark .week-calendar,
+.app.dark .week-overview-panel {
+  background: #111827 !important;
+  border-color: #334155 !important;
+}
+
+.app.dark .week-days {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+.app.dark .week-day,
+.app.dark .week-column {
+  color: #f8fafc !important;
+}
+
+.app.dark .week-grid {
+  background: linear-gradient(#334155 1px, transparent 1px), #111827 !important;
 }
 
 /* inputs */
@@ -66,61 +137,95 @@
 .app.dark input,
 .app.dark select,
 .app.dark textarea {
-  background: #1f2937;
-  color: #f9fafb;
-  border-color: #334155;
+  background: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
 }
 
-/* text */
-
-.app.dark .empty-day,
-.app.dark .today-header p,
-.app.dark .selected-date,
-.app.dark .assignment-card small,
-.app.dark .exam-card small,
-.app.dark .note-card span,
-.app.dark .daily-load-item span {
-  color: #94a3b8;
+.app.dark input::placeholder,
+.app.dark textarea::placeholder {
+  color: #94a3b8 !important;
 }
 
-.app.dark .assignment-notes,
-.app.dark .course-notes,
-.app.dark .note-card p {
-  color: #cbd5e1;
+/* buttons / pills */
+
+.app.dark button {
+  color: #f8fafc;
+}
+
+.app.dark .cancel-edit-btn,
+.app.dark .cancel-btn {
+  background: #334155 !important;
+  color: #f8fafc !important;
+}
+
+.app.dark .file-upload-btn,
+.app.dark .attached-file,
+.app.dark .existing-file-row a,
+.app.dark .legend-item,
+.app.dark .demo-note {
+  background: #1e293b !important;
+  color: #93c5fd !important;
+  border-color: #334155 !important;
 }
 
 /* calendar */
 
-.app.dark .study-calendar .react-calendar__tile {
-  background: #1f2937;
-  border-color: #334155;
-  color: #f9fafb;
+.app.dark .study-calendar .react-calendar__navigation button {
+  background: #1e293b !important;
+  color: #f8fafc !important;
 }
 
-.app.dark .study-calendar .react-calendar__navigation button {
-  color: #f9fafb;
+.app.dark .study-calendar .react-calendar__navigation__label {
+  color: #f8fafc !important;
+}
+
+.app.dark .study-calendar .react-calendar__month-view__weekdays__weekday {
+  color: #cbd5e1 !important;
+}
+
+.app.dark .study-calendar .react-calendar__tile {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
 }
 
 .app.dark .study-calendar .react-calendar__tile:hover {
-  background: #334155;
+  background: #334155 !important;
 }
 
-/* buttons */
-
-.app.dark .reset-filters-btn {
-  background: #312e81;
-  color: #e0e7ff;
+.app.dark .study-calendar .react-calendar__tile--active {
+  background: #2563eb !important;
+  color: white !important;
 }
 
-.app.dark .complete-btn,
-.app.dark .assignment-complete-btn {
-  background: #6366f1;
+.app.dark .today-highlight {
+  background: #1e3a8a !important;
+  border-color: #60a5fa !important;
 }
 
-.app.dark .assignment-edit-btn {
-  background: #8b5cf6;
+/* status colors stay visible */
+
+.app.dark .assignment-badge.done,
+.app.dark .status-badge.completed,
+.app.dark .status-pill.active,
+.app.dark .done-btn,
+.app.dark .exam-result-badge.passed {
+  background: #14532d !important;
+  color: #bbf7d0 !important;
 }
 
-.app.dark .assignment-delete-btn {
-  background: #dc2626;
+.app.dark .assignment-badge.pending,
+.app.dark .status-badge.missed,
+.app.dark .missed-btn,
+.app.dark .exam-result-badge.failed {
+  background: #7f1d1d !important;
+  color: #fecaca !important;
+}
+
+.app.dark .status-badge.pending,
+.app.dark .status-pill.next,
+.app.dark .status-pill.done {
+  background: #1e3a8a !important;
+  color: #bfdbfe !important;
 }

@@ -20,19 +20,6 @@
   box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
 }
 
-.course-box-delete {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  border-radius: 50%;
-  background: white;
-  color: #ef4444;
-  font-size: 18px;
-}
-
 .course-box-icon {
   width: 48px;
   height: 48px;
@@ -78,4 +65,22 @@
   border-radius: 50%;
   background: #eef6ff;
   color: #2563eb;
+}
+
+@media (max-width: 1200px) {
+  .courses-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .courses-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .courses-grid {
+    grid-template-columns: 1fr;
+  }
 }

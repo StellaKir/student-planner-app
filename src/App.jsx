@@ -78,6 +78,8 @@ function App() {
   const [showNoteForm, setShowNoteForm] = useState(false);
   const [showExamForm, setShowExamForm] = useState(false);
 
+  const [editingNoteId, setEditingNoteId] = useState(null);
+
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     return localStorage.getItem("loggedIn") === "true";
   });
@@ -267,6 +269,34 @@ function App() {
       document.getElementById("notes").value = course.notes || "";
       document.getElementById("color").value = course.color;
     }, 0);
+  }
+
+  function editNote(note) {
+    setEditingNoteId(note.id);
+    setShowNoteForm(true);
+
+    setTimeout(() => {
+      document.getElementById("note-course").value = note.course;
+      document.getElementById("note-text").value = note.text;
+      document.getElementById("note-file").value = "";
+    }, 0);
+  }
+
+  function deleteNote(id) {
+    setNotes(notes.filter((note) => note.id !== id));
+  }
+
+  function deleteNoteFile(noteId, fileId) {
+    setNotes(
+      notes.map((note) =>
+        note.id === noteId
+          ? {
+              ...note,
+              files: note.files.filter((file) => file.id !== fileId),
+            }
+          : note,
+      ),
+    );
   }
 
   function toggleComplete(id) {
@@ -478,6 +508,12 @@ function App() {
     document.getElementById("exam-course").value = "";
   }
 
+  function updateExamResult(id, result) {
+    setExams(
+      exams.map((exam) => (exam.id === id ? { ...exam, result } : exam)),
+    );
+  }
+
   function editAssignment(assignment) {
     document.getElementById("assignment-title").value = assignment.title;
     document.getElementById("assignment-date").value = assignment.dueDate;
@@ -510,31 +546,67 @@ function App() {
     const course = document.getElementById("note-course").value;
     const text = document.getElementById("note-text").value.trim();
     const fileInput = document.getElementById("note-file");
-    const fileName = fileInput.files[0] ? fileInput.files[0].name : "";
 
     if (!course || !text) {
       alert("Please select a course and write a note.");
       return;
     }
 
-    const newNote = {
-      id: Date.now(),
-      course,
-      text,
-      fileName,
-      createdAt: new Date().toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      }),
+    const existingNote = notes.find((note) => note.id === editingNoteId);
+    const existingFiles = existingNote?.files || [];
+
+    const files = Array.from(fileInput.files);
+
+    const saveNote = (newFiles) => {
+      const updatedNote = {
+        id: editingNoteId || Date.now(),
+        course,
+        text,
+        files: [...existingFiles, ...newFiles],
+        createdAt:
+          existingNote?.createdAt ||
+          new Date().toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          }),
+      };
+
+      if (editingNoteId) {
+        setNotes(
+          notes.map((note) => (note.id === editingNoteId ? updatedNote : note)),
+        );
+        setEditingNoteId(null);
+      } else {
+        setNotes([...notes, updatedNote]);
+      }
+
+      setShowNoteForm(false);
     };
 
-    setNotes([...notes, newNote]);
-    setShowNoteForm(false);
+    if (files.length === 0) {
+      saveNote([]);
+      return;
+    }
 
-    document.getElementById("note-course").value = "";
-    document.getElementById("note-text").value = "";
-    document.getElementById("note-file").value = "";
+    Promise.all(
+      files.map(
+        (file) =>
+          new Promise((resolve) => {
+            const reader = new FileReader();
+
+            reader.onload = () => {
+              resolve({
+                id: Date.now() + Math.random(),
+                name: file.name,
+                data: reader.result,
+              });
+            };
+
+            reader.readAsDataURL(file);
+          }),
+      ),
+    ).then(saveNote);
   }
 
   function addAssignment() {
@@ -683,6 +755,10 @@ function App() {
           </h1>
 
           <p>Sign in to manage your university schedule</p>
+          <p className="demo-note">
+            Note: This is a demo app. You can log in using any username and
+            password.
+          </p>
 
           <input type="text" placeholder="Username" id="login-username" />
 
@@ -696,13 +772,6 @@ function App() {
 
   return (
     <div className={darkMode ? "app dark" : "app"}>
-      <button
-        className="theme-toggle floating-theme"
-        onClick={() => setDarkMode(!darkMode)}
-        title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-      >
-        {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-      </button>
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <main className="main">
@@ -710,6 +779,8 @@ function App() {
           username={username}
           openAddModal={openAddModal}
           activeTab={activeTab}
+          darkMode={darkMode}
+          setDarkMode={setDarkMode}
         />
 
         {activeTab === "schedule" && (
@@ -745,6 +816,11 @@ function App() {
           <NotesTab
             notes={notes}
             addNote={addNote}
+            editNote={editNote}
+            deleteNote={deleteNote}
+            editingNoteId={editingNoteId}
+            setEditingNoteId={setEditingNoteId}
+            deleteNoteFile={deleteNoteFile}
             savedCourses={savedCourses}
             showNoteForm={showNoteForm}
             setShowNoteForm={setShowNoteForm}
@@ -768,6 +844,7 @@ function App() {
             exams={exams}
             deleteExam={deleteExam}
             toggleExamComplete={toggleExam}
+            updateExamResult={updateExamResult}
             savedCourses={savedCourses}
             addExam={addExam}
             showExamForm={showExamForm}
