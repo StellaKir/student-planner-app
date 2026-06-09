@@ -1,28 +1,19 @@
-function NotesTab({ notes, addNote, courseList }) {
+function NotesTab({
+  notes,
+  addNote,
+  savedCourses,
+  showNoteForm,
+  setShowNoteForm,
+}) {
   return (
     <section className="tab-section">
-      <h2>Notes</h2>
+      <div className="tab-header">
+        <div>
+          <h2>Notes</h2>
+          <p>Keep your study notes organized by course.</p>
+        </div>
 
-      <div className="note-form">
-        <select id="note-course">
-          <option value="">Select Course</option>
-
-          {courseList.map((course) => (
-            <option key={course.id} value={course.title}>
-              {course.title}
-            </option>
-          ))}
-        </select>
-
-        <textarea
-          id="note-text"
-          placeholder="Write your notes..."
-          rows="4"
-        ></textarea>
-
-        <input type="file" id="note-file" />
-
-        <button onClick={addNote}>Add Note</button>
+        <button onClick={() => setShowNoteForm(true)}>+ Add Note</button>
       </div>
 
       <div className="notes-list">
@@ -31,19 +22,62 @@ function NotesTab({ notes, addNote, courseList }) {
         ) : (
           notes.map((note) => (
             <div className="note-card" key={note.id}>
-              <div>
-                <strong>{note.course}</strong>
-
-                <span>{note.createdAt}</span>
+              <div className="note-card-header">
+                <div>
+                  <strong>{note.course}</strong>
+                  <span>{note.createdAt}</span>
+                </div>
               </div>
 
               <p>{note.text}</p>
 
-              {note.fileName && <small>Attached file: {note.fileName}</small>}
+              {note.fileName && (
+                <small className="attached-file">📎 {note.fileName}</small>
+              )}
             </div>
           ))
         )}
       </div>
+
+      {showNoteForm && (
+        <div className="modal-overlay">
+          <div className="form-modal note-modal">
+            <h2>Add Note</h2>
+
+            <div className="form">
+              <select id="note-course">
+                <option value="">Select Course</option>
+
+                {savedCourses.map((course) => (
+                  <option key={course.id} value={course.title}>
+                    {course.title}
+                  </option>
+                ))}
+              </select>
+
+              <textarea
+                id="note-text"
+                placeholder="Write your notes..."
+                rows="4"
+              ></textarea>
+
+              <label className="file-upload-btn">
+                Upload file
+                <input type="file" id="note-file" />
+              </label>
+
+              <button onClick={addNote}>Save Note</button>
+
+              <button
+                className="cancel-edit-btn"
+                onClick={() => setShowNoteForm(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

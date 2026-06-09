@@ -846,8 +846,9 @@
 ========================= */
 
 .today-schedule-panel {
-  max-height: 260px;
-  overflow: hidden;
+  min-height: auto;
+  max-height: none;
+  overflow: visible;
 }
 
 .timeline-card {
@@ -914,4 +915,95 @@
   background: #eef6ff;
   color: #2563eb;
   border: 1px solid #bfdbfe;
+}
+
+/* =========================
+   CLASS STATUS ACTIONS
+========================= */
+
+.status-badge {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 6px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.status-badge.completed {
+  background: #dcfce7;
+  color: #047857;
+}
+
+.status-badge.missed {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.status-badge.pending {
+  background: #eef6ff;
+  color: #2563eb;
+}
+
+.class-status-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.class-status-actions button {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.done-btn {
+  background: #dcfce7;
+  color: #047857;
+}
+
+.missed-btn {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.timeline-card {
+  min-height: 74px;
+  align-items: start;
+}
+
+.timeline-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+}
+
+.timeline-content strong {
+  font-size: 13px;
+  line-height: 1.2;
+  white-space: normal;
+}
+
+.status-badge {
+  margin-top: 2px;
+  padding: 3px 8px;
+  font-size: 9px;
+}
+
+.class-status-actions {
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.class-status-actions button {
+  padding: 3px 7px;
+  font-size: 9px;
+}
+
+.timeline-time {
+  font-size: 10px;
 }

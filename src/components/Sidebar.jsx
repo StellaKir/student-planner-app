@@ -41,14 +41,6 @@ function Sidebar({ activeTab, setActiveTab }) {
         </button>
 
         <button
-          className={activeTab === "favorites" ? "nav-link active" : "nav-link"}
-          onClick={() => setActiveTab("favorites")}
-        >
-          <Star size={18} />
-          <span>Favorites</span>
-        </button>
-
-        <button
           className={
             activeTab === "assignments" ? "nav-link active" : "nav-link"
           }

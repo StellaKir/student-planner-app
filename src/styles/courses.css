@@ -1,0 +1,81 @@
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+.course-box {
+  position: relative;
+  padding: 22px;
+  border-radius: 24px;
+  background: #eef6ff;
+  border: 1px solid #dbeafe;
+  cursor: pointer;
+  transition: 0.2s ease;
+  min-height: 170px;
+}
+
+.course-box:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
+}
+
+.course-box-delete {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 50%;
+  background: white;
+  color: #ef4444;
+  font-size: 18px;
+}
+
+.course-box-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: #3b82f6;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  margin-bottom: 16px;
+}
+
+.course-box h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 20px;
+}
+
+.course-box p {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.course-box span {
+  color: #2563eb;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.course-details-modal {
+  position: relative;
+  text-align: left;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 50%;
+  background: #eef6ff;
+  color: #2563eb;
+}

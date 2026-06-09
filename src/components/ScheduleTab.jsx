@@ -9,6 +9,8 @@ function ScheduleTab({
   totalStudyHours,
   completedCourses,
   pendingCourses,
+  missedCourses,
+  updateClassStatus,
   totalCourses,
   progress,
   filteredCourses,
@@ -116,6 +118,20 @@ function ScheduleTab({
                       <div className="timeline-title-row">
                         <strong>{course.title}</strong>
 
+                        {course.status === "completed" && (
+                          <span className="status-badge completed">
+                            Completed
+                          </span>
+                        )}
+
+                        {course.status === "missed" && (
+                          <span className="status-badge missed">Missed</span>
+                        )}
+
+                        {(!course.status || course.status === "pending") && (
+                          <span className="status-badge pending">Pending</span>
+                        )}
+
                         {status === "done" && (
                           <small className="status-pill done">Done</small>
                         )}
@@ -132,6 +148,23 @@ function ScheduleTab({
                       </div>
 
                       <p>{course.room}</p>
+                      <div className="class-status-actions">
+                        <button
+                          className="done-btn"
+                          onClick={() =>
+                            updateClassStatus(course.id, "completed")
+                          }
+                        >
+                          Done
+                        </button>
+
+                        <button
+                          className="missed-btn"
+                          onClick={() => updateClassStatus(course.id, "missed")}
+                        >
+                          Missed
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
@@ -149,20 +182,17 @@ function ScheduleTab({
           </div>
 
           <div className="progress-stats">
-            <div className="progress-stat">
-              <span>Completed</span>
-              <strong>{completedCourses}</strong>
-            </div>
+            <p>
+              <strong>{completedCourses}</strong> completed
+            </p>
 
-            <div className="progress-stat">
-              <span>Pending</span>
-              <strong>{pendingCourses}</strong>
-            </div>
+            <p>
+              <strong>{missedCourses}</strong> missed
+            </p>
 
-            <div className="progress-stat">
-              <span>Total</span>
-              <strong>{totalCourses}</strong>
-            </div>
+            <p>
+              <strong>{pendingCourses}</strong> pending
+            </p>
           </div>
         </section>
       </div>
@@ -188,8 +218,12 @@ function ScheduleTab({
 
             <div className="week-grid">
               {days.map((day) => {
+                const weekDate = weekDates.find((item) => item.day === day);
+
                 const dayCourses = filteredCourses.filter(
-                  (course) => course.day === day,
+                  (course) =>
+                    course.day === day &&
+                    Number(course.date?.split("-")[2]) === weekDate.date,
                 );
 
                 return (

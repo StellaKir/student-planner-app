@@ -5,6 +5,7 @@ import "./styles/sidebar.css";
 import "./styles/header.css";
 import "./styles/dashboard.css";
 import "./styles/schedule.css";
+import "./styles/courses.css";
 import "./styles/assignments.css";
 import "./styles/notes.css";
 import "./styles/exams.css";
@@ -37,6 +38,8 @@ function App() {
     const saved = localStorage.getItem("savedCourses");
     return saved ? JSON.parse(saved) : [];
   });
+
+  const [editingSavedCourseId, setEditingSavedCourseId] = useState(null);
 
   const [editingId, setEditingId] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -71,6 +74,9 @@ function App() {
     const saved = localStorage.getItem("notes");
     return saved ? JSON.parse(saved) : [];
   });
+
+  const [showNoteForm, setShowNoteForm] = useState(false);
+  const [showExamForm, setShowExamForm] = useState(false);
 
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     return localStorage.getItem("loggedIn") === "true";
@@ -128,7 +134,6 @@ function App() {
     document.getElementById("end").value = "";
     document.getElementById("room").value = "";
     document.getElementById("notes").value = "";
-    document.getElementById("priority").value = "low";
     document.getElementById("color").value = "blue";
   }
 
@@ -143,7 +148,7 @@ function App() {
 
   function addCourse() {
     const title = document.getElementById("title").value;
-    const day = document.getElementById("day").value;
+    const date = document.getElementById("class-date").value;
     const start = document.getElementById("start").value;
     const end = document.getElementById("end").value;
     const room = document.getElementById("room").value.trim();
@@ -152,7 +157,7 @@ function App() {
       (course) => course.title === title,
     );
 
-    if (!title || !start || !end || !room) {
+    if (!title || !date || !start || !end || !room) {
       alert("Please fill in all fields.");
       return;
     }
@@ -169,7 +174,7 @@ function App() {
 
     const conflict = courseList.some((course) => {
       if (course.id === editingId) return false;
-      if (course.day !== day) return false;
+      if (course.date !== date) return false;
 
       const newStart = toMinutes(start);
       const newEnd = toMinutes(end);
@@ -193,12 +198,14 @@ function App() {
       teacher: selectedCourse.teacher,
       notes: selectedCourse.notes,
       color: selectedCourse.color,
-      day,
+      date,
+      day: new Date(date).toLocaleDateString("en-US", {
+        weekday: "long",
+      }),
       startTime: start,
       endTime: end,
       room,
-      completed: existingCourse ? existingCourse.completed : false,
-      favorite: existingCourse ? existingCourse.favorite : false,
+      status: existingCourse ? existingCourse.status : "pending",
     };
 
     if (editingId) {
@@ -241,12 +248,23 @@ function App() {
 
     setTimeout(() => {
       document.getElementById("title").value = course.title;
-      document.getElementById("day").value = course.day;
+      document.getElementById("class-date").value = course.date || "";
       document.getElementById("start").value = course.startTime;
       document.getElementById("end").value = course.endTime;
       document.getElementById("room").value = course.room;
       document.getElementById("notes").value = course.notes || "";
-      document.getElementById("priority").value = course.priority || "low";
+      document.getElementById("color").value = course.color;
+    }, 0);
+  }
+
+  function editSavedCourse(course) {
+    setEditingSavedCourseId(course.id);
+    setShowFormModal(true);
+
+    setTimeout(() => {
+      document.getElementById("title").value = course.title;
+      document.getElementById("teacher").value = course.teacher || "";
+      document.getElementById("notes").value = course.notes || "";
       document.getElementById("color").value = course.color;
     }, 0);
   }
@@ -261,14 +279,6 @@ function App() {
 
   function deleteSavedCourse(id) {
     setSavedCourses(savedCourses.filter((course) => course.id !== id));
-  }
-
-  function toggleFavorite(id) {
-    const updatedCourses = courseList.map((course) =>
-      course.id === id ? { ...course, favorite: !course.favorite } : course,
-    );
-
-    setCourseList(updatedCourses);
   }
 
   function cancelEdit() {
@@ -303,9 +313,16 @@ function App() {
 
   const totalCourses = courseList.length;
   const completedCourses = courseList.filter(
-    (course) => course.completed,
+    (course) => course.status === "completed",
   ).length;
-  const pendingCourses = totalCourses - completedCourses;
+
+  const missedCourses = courseList.filter(
+    (course) => course.status === "missed",
+  ).length;
+
+  const pendingCourses = courseList.filter(
+    (course) => !course.status || course.status === "pending",
+  ).length;
   const totalAssignments = assignments.length;
   const completedAssignments = assignments.filter(
     (assignment) => assignment.completed,
@@ -440,7 +457,6 @@ function App() {
     const title = document.getElementById("exam-title").value.trim();
     const date = document.getElementById("exam-date").value;
     const course = document.getElementById("exam-course").value;
-    const priority = document.getElementById("exam-priority").value;
 
     if (!title || !date || !course) {
       alert("Please fill in all exam fields.");
@@ -452,15 +468,14 @@ function App() {
       title,
       date,
       course,
-      priority,
     };
 
     setExams([...exams, newExam]);
+    setShowExamForm(false);
 
     document.getElementById("exam-title").value = "";
     document.getElementById("exam-date").value = "";
     document.getElementById("exam-course").value = "";
-    document.getElementById("exam-priority").value = "medium";
   }
 
   function editAssignment(assignment) {
@@ -515,6 +530,7 @@ function App() {
     };
 
     setNotes([...notes, newNote]);
+    setShowNoteForm(false);
 
     document.getElementById("note-course").value = "";
     document.getElementById("note-text").value = "";
@@ -580,7 +596,9 @@ function App() {
   function tileContent({ date, view }) {
     if (view !== "month") return null;
 
-    const formattedDate = date.toISOString().split("T")[0];
+    const formattedDate = date.toLocaleDateString("en-CA");
+
+    const hasClass = courseList.some((course) => course.date === formattedDate);
 
     const hasAssignment = assignments.some(
       (assignment) => assignment.dueDate === formattedDate,
@@ -590,6 +608,8 @@ function App() {
 
     return (
       <div className="calendar-dots">
+        {hasClass && <span className="calendar-dot class-dot"></span>}
+
         {hasAssignment && <span className="calendar-dot assignment-dot"></span>}
 
         {hasExam && <span className="calendar-dot exam-dot"></span>}
@@ -609,15 +629,34 @@ function App() {
     }
 
     const newCourse = {
-      id: Date.now(),
+      id: editingSavedCourseId || Date.now(),
       title,
       teacher,
       notes,
       color,
     };
 
-    setSavedCourses([...savedCourses, newCourse]);
+    if (editingSavedCourseId) {
+      setSavedCourses(
+        savedCourses.map((course) =>
+          course.id === editingSavedCourseId ? newCourse : course,
+        ),
+      );
+
+      setEditingSavedCourseId(null);
+    } else {
+      setSavedCourses([...savedCourses, newCourse]);
+    }
+
     setShowFormModal(false);
+  }
+
+  function updateClassStatus(id, status) {
+    setCourseList(
+      courseList.map((course) =>
+        course.id === id ? { ...course, status } : course,
+      ),
+    );
   }
 
   function toggleExam(id) {
@@ -667,7 +706,11 @@ function App() {
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <main className="main">
-        <Header username={username} openAddModal={openAddModal} />
+        <Header
+          username={username}
+          openAddModal={openAddModal}
+          activeTab={activeTab}
+        />
 
         {activeTab === "schedule" && (
           <ScheduleTab
@@ -684,6 +727,8 @@ function App() {
             filteredCourses={filteredCourses}
             toMinutes={toMinutes}
             toggleExpand={toggleExpand}
+            missedCourses={missedCourses}
+            updateClassStatus={updateClassStatus}
           />
         )}
 
@@ -692,47 +737,18 @@ function App() {
             savedCourses={savedCourses}
             openCourseModal={openAddModal}
             deleteSavedCourse={deleteSavedCourse}
+            editSavedCourse={editSavedCourse}
           />
         )}
 
         {activeTab === "notes" && (
-          <NotesTab notes={notes} addNote={addNote} courseList={courseList} />
-        )}
-
-        {activeTab === "favorites" && (
-          <section className="tab-section">
-            <h2>Favorite Courses</h2>
-
-            <div className="course-list">
-              {courseList.filter((course) => course.favorite).length === 0 ? (
-                <p className="empty-day">No favorite courses yet.</p>
-              ) : (
-                courseList
-                  .filter((course) => course.favorite)
-                  .map((course) => (
-                    <div
-                      className={`list-card ${course.color}`}
-                      key={course.id}
-                    >
-                      <div>
-                        <strong>{course.title}</strong>
-                        <p>
-                          {course.day} · {formatTime(course.startTime)} -{" "}
-                          {formatTime(course.endTime)}
-                        </p>
-                        <small>{course.room}</small>
-                      </div>
-
-                      <span
-                        className={course.completed ? "status done" : "status"}
-                      >
-                        {course.completed ? "Completed" : "Pending"}
-                      </span>
-                    </div>
-                  ))
-              )}
-            </div>
-          </section>
+          <NotesTab
+            notes={notes}
+            addNote={addNote}
+            savedCourses={savedCourses}
+            showNoteForm={showNoteForm}
+            setShowNoteForm={setShowNoteForm}
+          />
         )}
 
         {activeTab === "assignments" && (
@@ -752,6 +768,10 @@ function App() {
             exams={exams}
             deleteExam={deleteExam}
             toggleExamComplete={toggleExam}
+            savedCourses={savedCourses}
+            addExam={addExam}
+            showExamForm={showExamForm}
+            setShowExamForm={setShowExamForm}
           />
         )}
 
@@ -763,6 +783,7 @@ function App() {
             tileContent={tileContent}
             assignments={assignments}
             exams={exams}
+            courseList={courseList}
           />
         )}
       </main>
@@ -786,7 +807,7 @@ function App() {
               <select id="assignment-course">
                 <option value="">Select Course</option>
 
-                {courseList.map((course) => (
+                {savedCourses.map((course) => (
                   <option key={course.id} value={course.title}>
                     {course.title}
                   </option>
@@ -825,7 +846,9 @@ function App() {
           <div className="form-modal">
             <h2>
               {activeTab === "courses"
-                ? "Add Course"
+                ? editingSavedCourseId
+                  ? "Edit Course"
+                  : "Add Course"
                 : editingId
                   ? "Edit Class"
                   : "Add Class"}
@@ -851,7 +874,9 @@ function App() {
                     <option value="orange">Orange</option>
                   </select>
 
-                  <button onClick={addSavedCourse}>Add Course</button>
+                  <button onClick={addSavedCourse}>
+                    {editingSavedCourseId ? "Update Course" : "Add Course"}
+                  </button>
                 </>
               ) : (
                 <>
@@ -865,13 +890,7 @@ function App() {
                     ))}
                   </select>
 
-                  <select id="day">
-                    <option>Monday</option>
-                    <option>Tuesday</option>
-                    <option>Wednesday</option>
-                    <option>Thursday</option>
-                    <option>Friday</option>
-                  </select>
+                  <input type="date" id="class-date" />
 
                   <select id="start">
                     <option value="">Start time</option>
